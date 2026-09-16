@@ -1,0 +1,2280 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000e48">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    :root {
+      --azul-marino: #000e48;
+      --azul-marino-2: #001a63;
+      --azul: #1e6fe0;
+      --azul-oscuro: #0d47a1;
+      --celeste: #29b6f6;
+      --naranja: #ff7a1a;
+      --gris: #f4f6f8;
+      --texto: #202124;
+      --borde: #dadce0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--gris);
+      margin: 0;
+      padding: 0;
+      color: var(--texto);
+    }
+    header {
+      background: var(--azul-marino);
+      color: white;
+      padding: 20px 16px 16px;
+      text-align: center;
+      border-bottom: 3px solid transparent;
+      border-image: linear-gradient(90deg, var(--naranja), var(--celeste)) 1;
+    }
+    header h1 { margin: 0; font-size: 20px; }
+    header p.subtitulo-informe {
+      margin: 10px 0 0;
+      font-size: 13px;
+      color: #cfe0ff;
+    }
+    header img {
+      -webkit-mask-image: radial-gradient(ellipse at center, #000 82%, transparent 100%);
+              mask-image: radial-gradient(ellipse at center, #000 82%, transparent 100%);
+      -webkit-mask-repeat: no-repeat;
+              mask-repeat: no-repeat;
+      -webkit-mask-size: 100% 100%;
+              mask-size: 100% 100%;
+    }
+
+    .tabs {
+      display: flex;
+      background: white;
+      border-bottom: 1px solid var(--borde);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .tab {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #5f6368;
+      border-bottom: 3px solid transparent;
+    }
+    .tab.active { color: var(--azul); border-color: var(--azul); }
+
+    .contenedor { max-width: 640px; margin: 0 auto; padding: 16px; }
+
+    .seccion {
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .seccion-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: none;
+      border: none;
+      font-family: inherit;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--azul);
+      font-weight: 700;
+      margin: 0 0 12px;
+      padding: 0 0 8px;
+      border-bottom: 2px solid var(--gris);
+      cursor: pointer;
+      text-align: left;
+    }
+    .seccion-flecha { transition: transform 0.2s ease; font-size: 13px; }
+    .seccion-header.abierto .seccion-flecha { transform: rotate(180deg); }
+    .seccion-contenido { display: none; }
+    .seccion-contenido.abierto { display: block; }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 10px 0 4px;
+      color: #444;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      background: white;
+    }
+    textarea { resize: vertical; min-height: 60px; }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--celeste);
+      box-shadow: 0 0 0 2px rgba(41,182,246,0.2);
+    }
+    .fila-doble { display: flex; gap: 10px; }
+    .fila-doble > div { flex: 1; }
+
+    .tipo-servicio { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .tipo-servicio label {
+      flex: 1 1 40%;
+      text-align: center;
+      padding: 10px 4px;
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      margin: 0;
+    }
+    .tipo-servicio input { display: none; }
+    .tipo-servicio input:checked + span { color: white; }
+    .tipo-servicio label:has(input:checked) { background: var(--azul); border-color: var(--azul); color: white; }
+
+    .checklist { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .checklist label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border: 1px solid var(--borde);
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      margin: 0;
+    }
+    .checklist input[type=checkbox] { width: auto; margin: 0; accent-color: var(--azul); }
+    .checklist label:has(input:checked) { background: var(--azul); border-color: var(--azul); color: white; }
+
+    .sugerencias-dropdown {
+      display: none;
+      position: absolute;
+      left: 0; right: 0; top: 100%;
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      margin-top: 4px;
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: 20;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .sugerencias-dropdown.abierto { display: block; }
+    .sugerencias-dropdown .item {
+      padding: 10px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      border-bottom: 1px solid var(--gris);
+    }
+    .sugerencias-dropdown .item:last-child { border-bottom: none; }
+    .sugerencias-dropdown .item:hover { background: var(--gris); }
+    .sugerencias-dropdown .vacio { padding: 10px 12px; font-size: 13px; color: #888; }
+
+    .acordeon-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--gris);
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin: 10px 0 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #444;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: left;
+    }
+    .acordeon-header span:first-child { flex: 1; }
+    .acordeon-badge {
+      background: var(--azul);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 1px 8px;
+      min-width: 18px;
+      text-align: center;
+    }
+    .acordeon-badge:empty, .acordeon-badge[data-cero="1"] { background: var(--borde); color: #777; }
+    .acordeon-flecha { transition: transform 0.2s ease; color: #777; }
+    .acordeon-header.abierto .acordeon-flecha { transform: rotate(180deg); }
+    .acordeon-contenido { display: none; }
+    .acordeon-contenido.abierto { display: flex; }
+
+    .foto-box {
+      border: 2px dashed var(--borde);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      margin-top: 6px;
+      cursor: pointer;
+      position: relative;
+    }
+    .foto-box img { max-width: 100%; max-height: 160px; border-radius: 6px; margin-top: 8px; }
+    .foto-box input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    }
+    .foto-box span { font-size: 13px; color: #5f6368; }
+
+    canvas#firma {
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      width: 100%;
+      height: 150px;
+      touch-action: none;
+      background: #fff;
+    }
+    .btn-limpiar {
+      margin-top: 6px;
+      background: none;
+      border: none;
+      color: var(--azul);
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 4px 0;
+    }
+
+    .btn-enviar {
+      width: 100%;
+      background: linear-gradient(135deg, var(--azul), var(--azul-marino-2));
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 6px;
+      box-shadow: 0 4px 14px rgba(30,111,224,0.35);
+    }
+    .btn-enviar:disabled { background: #9aa0a6; cursor: not-allowed; }
+
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(255,255,255,0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 100;
+      text-align: center;
+      padding: 20px;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid var(--gris);
+      border-top: 4px solid var(--azul);
+      border-radius: 50%;
+      animation: girar 0.8s linear infinite;
+      margin-bottom: 14px;
+    }
+    @keyframes girar { to { transform: rotate(360deg); } }
+
+    .exito { display: none; text-align: center; padding: 30px 16px; }
+    .exito .check {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: #34a853; color: white; font-size: 32px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px;
+    }
+    .exito a {
+      display: inline-block; margin-top: 14px;
+      background: var(--azul); color: white;
+      padding: 10px 20px; border-radius: 6px; text-decoration: none;
+      font-weight: 600; font-size: 14px;
+    }
+    .exito button {
+      display: block; margin: 14px auto 0;
+      background: none; border: 1px solid var(--borde);
+      padding: 8px 16px; border-radius: 6px; cursor: pointer;
+    }
+
+    #historial-lista { display: none; }
+    .historial-tipos { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+    .historial-tipos button {
+      flex: 1 1 40%;
+      text-align: center;
+      padding: 10px 4px;
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: inherit;
+      background: white;
+      color: inherit;
+    }
+    .historial-tipos button.activo { background: var(--azul); border-color: var(--azul); color: white; }
+    .item-historial {
+      background: white; border-radius: 10px; padding: 12px 14px;
+      margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      font-size: 13px;
+    }
+    .item-historial .cab { display: flex; justify-content: space-between; font-weight: 600; }
+    .item-historial .tag {
+      display: inline-block; font-size: 11px; background: var(--gris);
+      padding: 2px 8px; border-radius: 10px; margin-top: 4px; color: var(--azul);
+    }
+    .item-historial a { color: var(--azul); font-size: 12px; }
+    .tabla-registros {
+      width: 100%; border-collapse: collapse; background: white;
+      border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      font-size: 13px;
+    }
+    .tabla-registros th {
+      background: var(--azul); color: white; text-align: left;
+      padding: 8px 10px; font-size: 12px; font-weight: 600;
+    }
+    .tabla-registros td { padding: 8px 10px; border-bottom: 1px solid var(--gris); }
+    .tabla-registros tr:last-child td { border-bottom: none; }
+    .tabla-registros .btn-fila {
+      background: none; border: none; color: var(--azul); font-size: 12px;
+      cursor: pointer; text-decoration: underline; padding: 0; font-family: inherit;
+      white-space: nowrap;
+    }
+    .tabla-registros .btn-fila.btn-eliminar-fila { color: #c0392b; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="logo.png" alt="RRAS Ltda" style="max-width:220px;width:100%;height:auto;display:block;margin:0 auto;">
+    <p class="subtitulo-informe">Informe de Visita Técnica &middot; Aire Acondicionado / Electricidad / Construcción</p>
+  </header>
+
+  <div id="banner-sync" style="display:none;background:#fff3cd;color:#664d03;padding:8px 14px;font-size:13px;text-align:center;cursor:pointer;">
+    <span id="banner-sync-texto"></span>
+  </div>
+  <div id="banner-offline" style="display:none;background:#000e48;color:#fff;padding:6px 14px;font-size:12px;text-align:center;">
+    📶 Sin conexión — mostrando la última copia guardada. El Informe de Visita se puede seguir llenando y se enviará solo.
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="form">Informe de Visita</div>
+    <div class="tab" data-tab="sindefinir">Sin Definir</div>
+    <div class="tab" data-tab="presupuestos">Presupuestos</div>
+    <div class="tab" data-tab="historial">Historial</div>
+  </div>
+
+  <div class="contenedor">
+
+    <!-- ================= FORMULARIO ================= -->
+    <form id="form-informe">
+
+      <div class="seccion">
+        <button type="button" class="seccion-header abierto" data-target="contenido-datos-generales">
+          <span>Datos Generales</span>
+          <span class="seccion-flecha">▾</span>
+        </button>
+        <div class="seccion-contenido abierto" id="contenido-datos-generales">
+        <div class="fila-doble">
+          <div>
+            <label>Fecha</label>
+            <input type="date" id="fecha" required>
+          </div>
+          <div>
+            <label>Hora</label>
+            <input type="time" id="hora" required>
+          </div>
+        </div>
+        <label>Técnico</label>
+        <select id="tecnico" required>
+          <option value="" disabled selected>Selecciona un técnico</option>
+          <option>Rodrigo Pizarro</option>
+          <option>Edinson Castillo</option>
+          <option>Otro</option>
+        </select>
+
+        <button type="button" class="acordeon-header abierto" data-target="opciones-rubro">
+          <span>Rubro</span>
+          <span class="acordeon-badge" id="badge-opciones-rubro">Aire Acondicionado</span>
+          <span class="acordeon-flecha">▾</span>
+        </button>
+        <div class="tipo-servicio acordeon-contenido abierto" id="opciones-rubro">
+          <label><input type="radio" name="rubro" value="Aire Acondicionado" required checked><span>Aire Acondicionado</span></label>
+          <label><input type="radio" name="rubro" value="Electricidad"><span>Electricidad</span></label>
+          <label><input type="radio" name="rubro" value="Construcción y Reparaciones Menores"><span>Construcción y Reparaciones Menores</span></label>
+        </div>
+      </div>
+      </div>
+
+      <div class="seccion">
+        <button type="button" class="seccion-header" data-target="contenido-datos-del-cliente">
+          <span>Datos del Cliente</span>
+          <span class="seccion-flecha">▾</span>
+        </button>
+        <div class="seccion-contenido" id="contenido-datos-del-cliente">
+        <label>Cliente</label>
+        <div style="position:relative;">
+          <input type="text" id="cliente" placeholder="Busca un cliente o escribe uno nuevo" required autocomplete="off">
+          <div id="sugerencias-cliente" class="sugerencias-dropdown"></div>
+        </div>
+        <label>Dirección</label>
+        <input type="text" id="direccion" placeholder="Dirección de la visita" required>
+        <label>Teléfono</label>
+        <input type="tel" id="telefono" placeholder="+56 9 ...">
+        <label>Contacto</label>
+        <input type="text" id="contacto" placeholder="Nombre de la persona de contacto">
+        <label>Correo</label>
+        <input type="email" id="correo" placeholder="correo@ejemplo.com">
+      </div>
+      </div>
+
+      <div class="seccion">
+        <button type="button" class="seccion-header" data-target="contenido-datos-del-equipo">
+          <span id="titulo-seccion-equipo">Datos del Equipo</span>
+          <span class="seccion-flecha">▾</span>
+        </button>
+        <div class="seccion-contenido" id="contenido-datos-del-equipo">
+
+        <div id="datos-equipo-ac">
+          <div class="fila-doble">
+            <div>
+              <label>Tipo de Equipo</label>
+              <select id="tipoEquipo">
+                <option>Split Muro</option>
+                <option>Split Piso-Techo</option>
+                <option>Cassette</option>
+                <option>Ducto</option>
+                <option>Portátil</option>
+                <option>Otro</option>
+              </select>
+            </div>
+            <div>
+              <label>Capacidad (BTU)</label>
+              <select id="capacidad">
+                <option>9.000</option>
+                <option>12.000</option>
+                <option>24.000</option>
+                <option>36.000</option>
+                <option>48.000</option>
+                <option>60.000</option>
+                <option>120.000</option>
+                <option>Otro</option>
+              </select>
+            </div>
+          </div>
+          <div class="fila-doble">
+            <div>
+              <label>Marca</label>
+              <input type="text" id="marca">
+            </div>
+            <div>
+              <label>Modelo</label>
+              <input type="text" id="modelo">
+            </div>
+          </div>
+          <label>N° de Serie</label>
+          <input type="text" id="numeroSerie">
+          <label>Ubicación del Equipo</label>
+          <select id="ubicacionEquipo">
+            <option>Living</option>
+            <option>Dormitorio</option>
+            <option>Bodega</option>
+            <option>Oficina</option>
+            <option>Salón</option>
+            <option>Otro</option>
+          </select>
+        </div>
+
+        <div id="datos-equipo-elec" style="display:none;">
+          <div class="fila-doble">
+            <div>
+              <label>Tipo de Instalación</label>
+              <select id="tipoInstalacionElec">
+                <option>Residencial</option>
+                <option>Comercial</option>
+                <option>Industrial</option>
+                <option>Otro</option>
+              </select>
+            </div>
+            <div>
+              <label>Voltaje</label>
+              <select id="voltajeElec">
+                <option>220V Monofásico</option>
+                <option>380V Trifásico</option>
+                <option>110V</option>
+                <option>Otro</option>
+              </select>
+            </div>
+          </div>
+          <div class="fila-doble">
+            <div>
+              <label>Ubicación del Tablero</label>
+              <input type="text" id="tableroElec" placeholder="Ej: Entrada, empalme, subterráneo...">
+            </div>
+            <div>
+              <label>Amperaje</label>
+              <select id="amperajeElec">
+                <option>10A</option>
+                <option>16A</option>
+                <option>20A</option>
+                <option>32A</option>
+                <option>40A</option>
+                <option>63A</option>
+                <option>Otro</option>
+              </select>
+            </div>
+          </div>
+          <label>Ubicación del Trabajo</label>
+          <select id="ubicacionElec">
+            <option>Living</option>
+            <option>Dormitorio</option>
+            <option>Bodega</option>
+            <option>Oficina</option>
+            <option>Salón</option>
+            <option>Tablero General</option>
+            <option>Otro</option>
+          </select>
+        </div>
+
+        <div id="datos-equipo-constr" style="display:none;">
+          <div class="fila-doble">
+            <div>
+              <label>Tipo de Trabajo</label>
+              <select id="tipoTrabajoConstr">
+                <option>Reparación Menor</option>
+                <option>Ampliación</option>
+                <option>Remodelación</option>
+                <option>Mantención de Obra</option>
+                <option>Otro</option>
+              </select>
+            </div>
+            <div>
+              <label>Material Principal</label>
+              <select id="materialPrincipalConstr">
+                <option>Albañilería</option>
+                <option>Madera</option>
+                <option>Metalcon</option>
+                <option>Hormigón</option>
+                <option>Otro</option>
+              </select>
+            </div>
+          </div>
+          <label>Superficie / Área de Trabajo</label>
+          <div id="filas-superficie-constr"></div>
+          <button type="button" class="btn-limpiar" id="btn-agregar-superficie">+ Agregar medida</button>
+          <div style="margin-top:8px; font-size:14px;"><strong>Superficie Total:</strong> <span id="superficie-total-constr">0 m²</span></div>
+          <input type="hidden" id="superficieConstr">
+          <label>Ubicación del Trabajo</label>
+          <select id="ubicacionConstr">
+            <option>Living</option>
+            <option>Dormitorio</option>
+            <option>Bodega</option>
+            <option>Oficina</option>
+            <option>Salón</option>
+            <option>Fachada / Exterior</option>
+            <option>Techumbre</option>
+            <option>Otro</option>
+          </select>
+        </div>
+
+      </div>
+      </div>
+
+      <div class="seccion">
+        <button type="button" class="seccion-header" data-target="contenido-diagnostico-y-trabajo-realizado">
+          <span id="titulo-seccion-diagnostico">Diagnóstico y Trabajo Realizado</span>
+          <span class="seccion-flecha">▾</span>
+        </button>
+        <div class="seccion-contenido" id="contenido-diagnostico-y-trabajo-realizado">
+        <div id="campos-diagnostico-texto">
+          <label>Estado Inicial del Equipo</label>
+          <textarea id="estadoInicial" placeholder="Descripción del problema o condición encontrada"></textarea>
+
+          <label>Otro Diagnóstico (no listado)</label>
+          <input type="text" id="diagnosticoOtro" placeholder="Especificar si no está en la lista de arriba">
+
+          <label>Trabajo Realizado</label>
+          <textarea id="trabajoRealizado" placeholder="Detalle de la intervención"></textarea>
+        </div>
+
+        <div id="bloque-mediciones-ac">
+          <div id="campos-mediciones" style="display:none;">
+            <label>Mediciones</label>
+            <div class="fila-doble">
+              <div>
+                <label>Presión Alta (HP)</label>
+                <input type="text" id="presionAlta" placeholder="Ej: 180 psi">
+              </div>
+              <div>
+                <label>Presión Baja (LP)</label>
+                <input type="text" id="presionBaja" placeholder="Ej: 65 psi">
+              </div>
+            </div>
+            <div class="fila-doble">
+              <div>
+                <label>T° Interior</label>
+                <input type="text" id="tempInterior" placeholder="Ej: 24°C">
+              </div>
+              <div>
+                <label>T° Exterior</label>
+                <input type="text" id="tempExterior" placeholder="Ej: 32°C">
+              </div>
+            </div>
+            <label>Sobrecalentamiento (SH)</label>
+            <input type="text" id="sobrecalentamiento" placeholder="Ej: 8°C">
+          </div>
+        </div>
+
+        <div id="bloque-mediciones-elec" style="display:none;">
+          <label>Mediciones Eléctricas</label>
+          <div class="fila-doble">
+            <div>
+              <label>Voltaje Medido</label>
+              <input type="text" id="voltajeMedido" placeholder="Ej: 220V">
+            </div>
+            <div>
+              <label>Corriente Medida</label>
+              <input type="text" id="corrienteMedida" placeholder="Ej: 8A">
+            </div>
+          </div>
+          <label>Resistencia de Tierra</label>
+          <input type="text" id="resistenciaTierra" placeholder="Ej: 5 Ω">
+        </div>
+
+        <div id="campos-requiere" style="display:none;">
+          <label>Requiere</label>
+          <select id="requiere">
+            <option value="">Ninguno / No aplica</option>
+            <option value="Instalación">Instalación</option>
+            <option value="Reparación">Reparación</option>
+            <option value="Mantención">Mantención</option>
+          </select>
+        </div>
+
+        <div id="bloque-diagnostico-ac">
+          <button type="button" class="acordeon-header" data-target="checklist-diagnostico">
+            <span>Posibles Diagnósticos / Fallas Detectadas</span>
+            <span class="acordeon-badge" id="badge-checklist-diagnostico">0</span>
+            <span class="acordeon-flecha">▾</span>
+          </button>
+          <div class="checklist acordeon-contenido" id="checklist-diagnostico">
+            <label><input type="checkbox" value="Fuga de gas refrigerante"><span>Fuga de gas refrigerante</span></label>
+            <label><input type="checkbox" value="Baja carga de refrigerante"><span>Baja carga de refrigerante</span></label>
+            <label><input type="checkbox" value="Filtro de aire sucio u obstruido"><span>Filtro de aire sucio u obstruido</span></label>
+            <label><input type="checkbox" value="Serpentín evaporador sucio"><span>Serpentín evaporador sucio</span></label>
+            <label><input type="checkbox" value="Serpentín condensador sucio"><span>Serpentín condensador sucio</span></label>
+            <label><input type="checkbox" value="Capacitor dañado"><span>Capacitor dañado</span></label>
+            <label><input type="checkbox" value="Contactor dañado"><span>Contactor dañado</span></label>
+            <label><input type="checkbox" value="Compresor no arranca"><span>Compresor no arranca</span></label>
+            <label><input type="checkbox" value="Compresor con ruido anormal"><span>Compresor con ruido anormal</span></label>
+            <label><input type="checkbox" value="Motor ventilador interior dañado"><span>Motor ventilador interior dañado</span></label>
+            <label><input type="checkbox" value="Motor ventilador exterior dañado"><span>Motor ventilador exterior dañado</span></label>
+            <label><input type="checkbox" value="Placa electrónica dañada"><span>Placa electrónica dañada</span></label>
+            <label><input type="checkbox" value="Sensor de temperatura defectuoso"><span>Sensor de temperatura defectuoso</span></label>
+            <label><input type="checkbox" value="Termostato descalibrado"><span>Termostato descalibrado</span></label>
+            <label><input type="checkbox" value="Falla de cableado / conexión eléctrica"><span>Falla de cableado / conexión eléctrica</span></label>
+            <label><input type="checkbox" value="Sin alimentación eléctrica"><span>Sin alimentación eléctrica</span></label>
+            <label><input type="checkbox" value="Drenaje de condensado obstruido"><span>Drenaje de condensado obstruido</span></label>
+            <label><input type="checkbox" value="Fuga de agua"><span>Fuga de agua</span></label>
+            <label><input type="checkbox" value="Instalación deficiente (soporte / fijación)"><span>Instalación deficiente (soporte / fijación)</span></label>
+            <label><input type="checkbox" value="Aislación térmica deteriorada"><span>Aislación térmica deteriorada</span></label>
+            <label><input type="checkbox" value="Equipo sobre/subdimensionado"><span>Equipo sobre/subdimensionado</span></label>
+            <label><input type="checkbox" value="Ruido o vibración excesiva"><span>Ruido o vibración excesiva</span></label>
+            <label><input type="checkbox" value="Formación de hielo (congelamiento)"><span>Formación de hielo (congelamiento)</span></label>
+            <label><input type="checkbox" value="No enfría correctamente"><span>No enfría correctamente</span></label>
+            <label><input type="checkbox" value="No calienta correctamente (bomba de calor)"><span>No calienta correctamente (bomba de calor)</span></label>
+            <label><input type="checkbox" value="Control remoto no funciona"><span>Control remoto no funciona</span></label>
+            <label><input type="checkbox" value="Equipo sin fallas detectadas"><span>Equipo sin fallas detectadas</span></label>
+          </div>
+        </div>
+
+        <div id="bloque-diagnostico-elec" style="display:none;">
+          <button type="button" class="acordeon-header" data-target="checklist-diagnostico-elec">
+            <span>Posibles Diagnósticos / Fallas Detectadas</span>
+            <span class="acordeon-badge" id="badge-checklist-diagnostico-elec">0</span>
+            <span class="acordeon-flecha">▾</span>
+          </button>
+          <div class="checklist acordeon-contenido" id="checklist-diagnostico-elec">
+            <label><input type="checkbox" value="Cortocircuito"><span>Cortocircuito</span></label>
+            <label><input type="checkbox" value="Sobrecarga en el circuito"><span>Sobrecarga en el circuito</span></label>
+            <label><input type="checkbox" value="Automático (breaker) en mal estado"><span>Automático (breaker) en mal estado</span></label>
+            <label><input type="checkbox" value="Diferencial (protección) en mal estado"><span>Diferencial (protección) en mal estado</span></label>
+            <label><input type="checkbox" value="Fusible quemado"><span>Fusible quemado</span></label>
+            <label><input type="checkbox" value="Cableado deteriorado / en mal estado"><span>Cableado deteriorado / en mal estado</span></label>
+            <label><input type="checkbox" value="Enchufe o toma corriente dañado"><span>Enchufe o toma corriente dañado</span></label>
+            <label><input type="checkbox" value="Interruptor defectuoso"><span>Interruptor defectuoso</span></label>
+            <label><input type="checkbox" value="Falla de conexión a tierra"><span>Falla de conexión a tierra</span></label>
+            <label><input type="checkbox" value="Fuga de corriente"><span>Fuga de corriente</span></label>
+            <label><input type="checkbox" value="Luminaria o ampolleta quemada"><span>Luminaria o ampolleta quemada</span></label>
+            <label><input type="checkbox" value="Balastro defectuoso"><span>Balastro defectuoso</span></label>
+            <label><input type="checkbox" value="Sobrecalentamiento de cables o conexiones"><span>Sobrecalentamiento de cables o conexiones</span></label>
+            <label><input type="checkbox" value="Instalación no normalizada"><span>Instalación no normalizada</span></label>
+            <label><input type="checkbox" value="Falta de protección diferencial"><span>Falta de protección diferencial</span></label>
+            <label><input type="checkbox" value="Corte de suministro eléctrico"><span>Corte de suministro eléctrico</span></label>
+            <label><input type="checkbox" value="Bajo voltaje / voltaje inestable"><span>Bajo voltaje / voltaje inestable</span></label>
+            <label><input type="checkbox" value="Motor eléctrico no arranca"><span>Motor eléctrico no arranca</span></label>
+            <label><input type="checkbox" value="Tablero eléctrico dañado"><span>Tablero eléctrico dañado</span></label>
+            <label><input type="checkbox" value="Timbre / citófono no funciona"><span>Timbre / citófono no funciona</span></label>
+            <label><input type="checkbox" value="Instalación sin fallas detectadas"><span>Instalación sin fallas detectadas</span></label>
+          </div>
+        </div>
+
+        <div id="bloque-diagnostico-constr" style="display:none;">
+          <button type="button" class="acordeon-header" data-target="checklist-diagnostico-constr">
+            <span>Posibles Diagnósticos / Fallas Detectadas</span>
+            <span class="acordeon-badge" id="badge-checklist-diagnostico-constr">0</span>
+            <span class="acordeon-flecha">▾</span>
+          </button>
+          <div class="checklist acordeon-contenido" id="checklist-diagnostico-constr">
+            <label><input type="checkbox" value="Filtración de agua / humedad"><span>Filtración de agua / humedad</span></label>
+            <label><input type="checkbox" value="Grieta en muro"><span>Grieta en muro</span></label>
+            <label><input type="checkbox" value="Grieta en techo"><span>Grieta en techo</span></label>
+            <label><input type="checkbox" value="Pintura deteriorada / descascarada"><span>Pintura deteriorada / descascarada</span></label>
+            <label><input type="checkbox" value="Puerta desalineada"><span>Puerta desalineada</span></label>
+            <label><input type="checkbox" value="Ventana desalineada"><span>Ventana desalineada</span></label>
+            <label><input type="checkbox" value="Piso dañado o levantado"><span>Piso dañado o levantado</span></label>
+            <label><input type="checkbox" value="Techumbre con daños (tejas/planchas)"><span>Techumbre con daños (tejas/planchas)</span></label>
+            <label><input type="checkbox" value="Cañería con fuga"><span>Cañería con fuga</span></label>
+            <label><input type="checkbox" value="Desagüe obstruido"><span>Desagüe obstruido</span></label>
+            <label><input type="checkbox" value="Falla estructural menor"><span>Falla estructural menor</span></label>
+            <label><input type="checkbox" value="Daño por humedad en madera"><span>Daño por humedad en madera</span></label>
+            <label><input type="checkbox" value="Terminaciones incompletas"><span>Terminaciones incompletas</span></label>
+            <label><input type="checkbox" value="Cierre perimetral dañado (reja/portón)"><span>Cierre perimetral dañado (reja/portón)</span></label>
+            <label><input type="checkbox" value="Muro con desprendimiento de material"><span>Muro con desprendimiento de material</span></label>
+            <label><input type="checkbox" value="Obra sin fallas detectadas"><span>Obra sin fallas detectadas</span></label>
+          </div>
+        </div>
+
+        <div id="bloque-repuestos-ac">
+          <button type="button" class="acordeon-header" data-target="checklist-repuestos">
+            <span>Repuestos Utilizados</span>
+            <span class="acordeon-badge" id="badge-checklist-repuestos">0</span>
+            <span class="acordeon-flecha">▾</span>
+          </button>
+          <div class="checklist acordeon-contenido" id="checklist-repuestos">
+            <label><input type="checkbox" value="Capacitor 25uF"><span>Capacitor 25uF</span></label>
+            <label><input type="checkbox" value="Capacitor 35uF"><span>Capacitor 35uF</span></label>
+            <label><input type="checkbox" value="Capacitor 45uF"><span>Capacitor 45uF</span></label>
+            <label><input type="checkbox" value="Contactor"><span>Contactor</span></label>
+            <label><input type="checkbox" value="Compresor"><span>Compresor</span></label>
+            <label><input type="checkbox" value="Motor ventilador unidad interior"><span>Motor ventilador unidad interior</span></label>
+            <label><input type="checkbox" value="Motor ventilador unidad exterior"><span>Motor ventilador unidad exterior</span></label>
+            <label><input type="checkbox" value="Placa electrónica / tarjeta de control"><span>Placa electrónica / tarjeta de control</span></label>
+            <label><input type="checkbox" value="Válvula de expansión"><span>Válvula de expansión</span></label>
+            <label><input type="checkbox" value="Sensor / termostato"><span>Sensor / termostato</span></label>
+            <label><input type="checkbox" value="Bomba de condensado"><span>Bomba de condensado</span></label>
+            <label><input type="checkbox" value="Filtro de aire"><span>Filtro de aire</span></label>
+            <label><input type="checkbox" value="Control remoto"><span>Control remoto</span></label>
+            <label><input type="checkbox" value="Pilas del control remoto"><span>Pilas del control remoto</span></label>
+          </div>
+
+          <button type="button" class="acordeon-header" data-target="checklist-materiales">
+            <span>Materiales Utilizados</span>
+            <span class="acordeon-badge" id="badge-checklist-materiales">0</span>
+            <span class="acordeon-flecha">▾</span>
+          </button>
+          <div class="checklist acordeon-contenido" id="checklist-materiales">
+            <label><input type="checkbox" value="Gas refrigerante R410A"><span>Gas refrigerante R410A</span></label>
+            <label><input type="checkbox" value="Gas refrigerante R22"><span>Gas refrigerante R22</span></label>
+            <label><input type="checkbox" value="Gas refrigerante R32"><span>Gas refrigerante R32</span></label>
+            <label><input type="checkbox" value="Cañería de cobre"><span>Cañería de cobre</span></label>
+            <label><input type="checkbox" value="Aislante térmico (Armaflex)"><span>Aislante térmico (Armaflex)</span></label>
+            <label><input type="checkbox" value="Soldadura de plata"><span>Soldadura de plata</span></label>
+            <label><input type="checkbox" value="Nitrógeno"><span>Nitrógeno</span></label>
+            <label><input type="checkbox" value="Cable eléctrico"><span>Cable eléctrico</span></label>
+            <label><input type="checkbox" value="Terminales / conectores eléctricos"><span>Terminales / conectores eléctricos</span></label>
+            <label><input type="checkbox" value="Abrazaderas / soportes"><span>Abrazaderas / soportes</span></label>
+            <label><input type="checkbox" value="Manguera de drenaje"><span>Manguera de drenaje</span></label>
+            <label><input type="checkbox" value="Cinta aislante"><span>Cinta aislante</span></label>
+            <label><input type="checkbox" value="Desengrasante / limpia serpentín"><span>Desengrasante / limpia serpentín</span></label>
+          </div>
+        </div>
+
+        <div id="bloque-repuestos-elec" style="display:none;">
+          <button type="button" class="acordeon-header" data-target="checklist-repuestos-elec">
+            <span>Repuestos Utilizados</span>
+            <span class="acordeon-badge" id="badge-checklist-repuestos-elec">0</span>
+            <span class="acordeon-flecha">▾</span>
+          </button>
+          <div class="checklist acordeon-contenido" id="checklist-repuestos-elec">
+            <label><input type="checkbox" value="Automático (breaker) 10A"><span>Automático (breaker) 10A</span></label>
+            <label><input type="checkbox" value="Automático (breaker) 16A"><span>Automático (breaker) 16A</span></label>
+            <label><input type="checkbox" value="Automático (breaker) 20A"><span>Automático (breaker) 20A</span></label>
+            <label><input type="checkbox" value="Automático (breaker) 32A"><span>Automático (breaker) 32A</span></label>
+            <label><input type="checkbox" value="Automático (breaker) 40A"><span>Automático (breaker) 40A</span></label>
+            <label><input type="checkbox" value="Diferencial (protección de fuga)"><span>Diferencial (protección de fuga)</span></label>
+            <label><input type="checkbox" value="Fusible"><span>Fusible</span></label>
+            <label><input type="checkbox" value="Enchufe / toma corriente"><span>Enchufe / toma corriente</span></label>
+            <label><input type="checkbox" value="Interruptor simple"><span>Interruptor simple</span></label>
+            <label><input type="checkbox" value="Interruptor de cruce"><span>Interruptor de cruce</span></label>
+            <label><input type="checkbox" value="Portalámparas"><span>Portalámparas</span></label>
+            <label><input type="checkbox" value="Balastro"><span>Balastro</span></label>
+            <label><input type="checkbox" value="Partidor"><span>Partidor</span></label>
+            <label><input type="checkbox" value="Contactor eléctrico"><span>Contactor eléctrico</span></label>
+            <label><input type="checkbox" value="Timbre / citófono"><span>Timbre / citófono</span></label>
+            <label><input type="checkbox" value="Tablero eléctrico"><span>Tablero eléctrico</span></label>
+          </div>
+
+          <button type="button" class="acordeon-header" data-target="checklist-materiales-elec">
+            <span>Materiales Utilizados</span>
+            <span class="acordeon-badge" id="badge-checklist-materiales-elec">0</span>
+            <span class="acordeon-flecha">▾</span>
+          </button>
+          <div class="checklist acordeon-contenido" id="checklist-materiales-elec">
+            <label><input type="checkbox" value="Cable eléctrico 1.5mm"><span>Cable eléctrico 1.5mm</span></label>
+            <label><input type="checkbox" value="Cable eléctrico 2.5mm"><span>Cable eléctrico 2.5mm</span></label>
+            <label><input type="checkbox" value="Cable eléctrico 4mm"><span>Cable eléctrico 4mm</span></label>
+            <label><input type="checkbox" value="Cable eléctrico 6mm"><span>Cable eléctrico 6mm</span></label>
+            <label><input type="checkbox" value="Tubo corrugado / conduit"><span>Tubo corrugado / conduit</span></label>
+            <label><input type="checkbox" value="Cinta aislante"><span>Cinta aislante</span></label>
+            <label><input type="checkbox" value="Terminales / conectores eléctricos"><span>Terminales / conectores eléctricos</span></label>
+            <label><input type="checkbox" value="Caja de paso / registro"><span>Caja de paso / registro</span></label>
+            <label><input type="checkbox" value="Canaleta plástica"><span>Canaleta plástica</span></label>
+            <label><input type="checkbox" value="Amarras plásticas"><span>Amarras plásticas</span></label>
+            <label><input type="checkbox" value="Prensaestopa"><span>Prensaestopa</span></label>
+          </div>
+        </div>
+
+        <div id="bloque-repuestos-constr" style="display:none;">
+          <button type="button" class="acordeon-header" data-target="checklist-repuestos-constr">
+            <span>Repuestos Utilizados</span>
+            <span class="acordeon-badge" id="badge-checklist-repuestos-constr">0</span>
+            <span class="acordeon-flecha">▾</span>
+          </button>
+          <div class="checklist acordeon-contenido" id="checklist-repuestos-constr">
+            <label><input type="checkbox" value="Bisagras"><span>Bisagras</span></label>
+            <label><input type="checkbox" value="Chapa / cerradura"><span>Chapa / cerradura</span></label>
+            <label><input type="checkbox" value="Perfil de aluminio"><span>Perfil de aluminio</span></label>
+            <label><input type="checkbox" value="Vidrio"><span>Vidrio</span></label>
+            <label><input type="checkbox" value="Plancha de yeso cartón (volcanita)"><span>Plancha de yeso cartón (volcanita)</span></label>
+            <label><input type="checkbox" value="Teja / plancha de zinc"><span>Teja / plancha de zinc</span></label>
+            <label><input type="checkbox" value="Llave de paso"><span>Llave de paso</span></label>
+            <label><input type="checkbox" value="Grifería"><span>Grifería</span></label>
+          </div>
+
+          <button type="button" class="acordeon-header" data-target="checklist-materiales-constr">
+            <span>Materiales Utilizados</span>
+            <span class="acordeon-badge" id="badge-checklist-materiales-constr">0</span>
+            <span class="acordeon-flecha">▾</span>
+          </button>
+          <div class="checklist acordeon-contenido" id="checklist-materiales-constr">
+            <label><input type="checkbox" value="Cemento"><span>Cemento</span></label>
+            <label><input type="checkbox" value="Arena"><span>Arena</span></label>
+            <label><input type="checkbox" value="Fierro (armadura)"><span>Fierro (armadura)</span></label>
+            <label><input type="checkbox" value="Ladrillo / bloque"><span>Ladrillo / bloque</span></label>
+            <label><input type="checkbox" value="Pintura interior"><span>Pintura interior</span></label>
+            <label><input type="checkbox" value="Pintura exterior"><span>Pintura exterior</span></label>
+            <label><input type="checkbox" value="Sellador / silicona"><span>Sellador / silicona</span></label>
+            <label><input type="checkbox" value="Impermeabilizante"><span>Impermeabilizante</span></label>
+            <label><input type="checkbox" value="Madera / tablas"><span>Madera / tablas</span></label>
+            <label><input type="checkbox" value="Clavos / tornillos"><span>Clavos / tornillos</span></label>
+            <label><input type="checkbox" value="Cerámica"><span>Cerámica</span></label>
+            <label><input type="checkbox" value="Porcelanato"><span>Porcelanato</span></label>
+            <label><input type="checkbox" value="Adhesivo para cerámica / porcelanato"><span>Adhesivo para cerámica / porcelanato</span></label>
+            <label><input type="checkbox" value="Fragüe / boquilla"><span>Fragüe / boquilla</span></label>
+          </div>
+        </div>
+
+        <label>Otro Repuesto o Material (no listado)</label>
+        <input type="text" id="repuestosOtro" placeholder="Especificar si no está en las listas de arriba">
+
+        <label>Estado Final del Equipo</label>
+        <textarea id="estadoFinal" placeholder="Condición al finalizar el servicio"></textarea>
+      </div>
+      </div>
+
+      <div class="seccion">
+        <button type="button" class="seccion-header" data-target="contenido-observaciones-y-recomendaciones">
+          <span>Observaciones y Recomendaciones</span>
+          <span class="seccion-flecha">▾</span>
+        </button>
+        <div class="seccion-contenido" id="contenido-observaciones-y-recomendaciones">
+        <label>Observaciones</label>
+        <textarea id="observaciones"></textarea>
+        <label>Recomendaciones</label>
+        <textarea id="recomendaciones"></textarea>
+        <label>Próxima Mantención Sugerida</label>
+        <input type="date" id="proximaMantencion">
+      </div>
+      </div>
+
+      <div class="seccion">
+        <button type="button" class="seccion-header" data-target="contenido-registro-fotografico">
+          <span>Registro Fotográfico</span>
+          <span class="seccion-flecha">▾</span>
+        </button>
+        <div class="seccion-contenido" id="contenido-registro-fotografico">
+        <label>Foto Antes</label>
+        <div class="foto-box" id="box-antes">
+          <span id="txt-antes">Toca para tomar/subir foto</span>
+          <input type="file" accept="image/*" capture="environment" id="fotoAntes">
+        </div>
+        <label>Foto Después</label>
+        <div class="foto-box" id="box-despues">
+          <span id="txt-despues">Toca para tomar/subir foto</span>
+          <input type="file" accept="image/*" capture="environment" id="fotoDespues">
+        </div>
+      </div>
+      </div>
+
+      <div class="seccion">
+        <button type="button" class="seccion-header" data-target="contenido-firma-del-cliente">
+          <span>Firma del Cliente</span>
+          <span class="seccion-flecha">▾</span>
+        </button>
+        <div class="seccion-contenido" id="contenido-firma-del-cliente">
+        <canvas id="firma"></canvas>
+        <button type="button" class="btn-limpiar" id="limpiarFirma">Limpiar firma</button>
+      </div>
+      </div>
+
+      <button type="submit" class="btn-enviar" id="btnEnviar">Guardar y Generar Informe</button>
+    </form>
+
+    <!-- ================= HISTORIAL ================= -->
+    <div id="historial-lista">
+      <div id="historial-resultados"></div>
+    </div>
+
+    <!-- ================= SIN DEFINIR (diagnósticos sin Tipo de Trabajo asignado) ================= -->
+    <div id="sindefinir-lista" style="display:none;">
+      <div id="sindefinir-resultados"></div>
+    </div>
+
+    <!-- ================= PRESUPUESTOS ================= -->
+    <div id="presupuestos-lista" style="display:none;">
+      <div id="presupuestos-resultados"></div>
+      <h3 style="margin:20px 0 10px;">Presupuestos Generados</h3>
+      <div id="presupuestos-generados-resultados"></div>
+    </div>
+
+    <!-- Compartido entre Historial, Sin Definir y Presupuestos: editor de ítems al enviar un informe a presupuesto -->
+    <div id="editor-presupuesto-activo" style="display:none; margin-top:14px;"></div>
+
+  </div>
+
+  <!-- ================= OVERLAY DE CARGA ================= -->
+  <div class="overlay" id="overlay">
+    <div class="spinner"></div>
+    <p>Guardando informe y generando PDF...</p>
+  </div>
+
+  <!-- ================= PANTALLA DE ÉXITO ================= -->
+  <div class="exito" id="exito">
+    <div class="check">✓</div>
+    <h2>Informe Guardado</h2>
+    <p id="exito-id"></p>
+    <a id="link-pdf" href="#" target="_blank">Ver PDF del Informe</a>
+    <button type="button" class="btn-enviar" id="btnClasificarAhora" style="margin-top:10px;">Clasificar y Generar Presupuesto</button>
+    <button id="btnNuevo">Crear otro informe</button>
+  </div>
+
+  <script src="pwa-api.js"></script>
+  <script>
+    // ---------- Datos iniciales: en la app de oficina venían incrustados por GAS al cargar
+    // la página; acá (PWA aparte) se cargan de la última copia guardada en el celular y se
+    // refrescan solos contra la API en cuanto hay conexión (ver pwa-api.js). ----------
+    let HISTORIAL_INICIAL = leerCache_('historial', []);
+    let PENDIENTES_PRESUPUESTO = leerCache_('pendientesPresupuesto', []);
+    let PRESUPUESTOS_GENERADOS = leerCache_('presupuestosGenerados', []);
+    let CLIENTES_GUARDADOS = leerCache_('clientes', []);
+    let CLIENTES_POR_NOMBRE = {};
+    let clientesOrdenados = [];
+
+    function reconstruirIndicesClientes_() {
+      CLIENTES_POR_NOMBRE = {};
+      CLIENTES_GUARDADOS.forEach(c => { CLIENTES_POR_NOMBRE[c.cliente] = c; });
+      clientesOrdenados = CLIENTES_GUARDADOS.slice().sort((a, b) => a.cliente.localeCompare(b.cliente, 'es'));
+    }
+    reconstruirIndicesClientes_();
+
+    // Solo se autocompletan los datos de CONTACTO del cliente (no cambian entre visitas).
+    // Los datos del equipo NO se autocompletan: un mismo cliente puede tener varios equipos
+    // distintos, así que rellenar con el último dejaría datos de otro equipo pegados aquí.
+    function aplicarClienteSeleccionado_(nombre) {
+      const c = CLIENTES_POR_NOMBRE[nombre];
+      if (!c) return;
+      document.getElementById('direccion').value = c.direccion || '';
+      document.getElementById('telefono').value = c.telefono || '';
+      document.getElementById('contacto').value = c.contacto || '';
+      document.getElementById('correo').value = c.correo || '';
+    }
+
+    // ---------- Buscador de clientes (lista propia, no depende del <datalist> nativo) ----------
+    const inputCliente = document.getElementById('cliente');
+    const sugerenciasClienteEl = document.getElementById('sugerencias-cliente');
+
+    function renderSugerenciasCliente_(filtro) {
+      const texto = (filtro || '').toLowerCase().trim();
+      const coincidencias = texto
+        ? clientesOrdenados.filter(c => c.cliente.toLowerCase().includes(texto))
+        : clientesOrdenados;
+
+      if (coincidencias.length === 0) {
+        sugerenciasClienteEl.innerHTML = texto
+          ? '<div class="vacio">Cliente nuevo — se guardará al enviar el informe</div>'
+          : '<div class="vacio">Aún no hay clientes guardados</div>';
+      } else {
+        sugerenciasClienteEl.innerHTML = coincidencias.slice(0, 30).map(c =>
+          '<div class="item" data-nombre="' + c.cliente.replace(/"/g, '&quot;') + '">' + c.cliente + '</div>'
+        ).join('');
+      }
+      sugerenciasClienteEl.classList.add('abierto');
+    }
+
+    inputCliente.addEventListener('focus', () => renderSugerenciasCliente_(inputCliente.value));
+    inputCliente.addEventListener('input', function() {
+      renderSugerenciasCliente_(this.value);
+      aplicarClienteSeleccionado_(this.value);
+    });
+
+    sugerenciasClienteEl.addEventListener('click', function(e) {
+      const item = e.target.closest('.item');
+      if (!item) return;
+      inputCliente.value = item.dataset.nombre;
+      aplicarClienteSeleccionado_(item.dataset.nombre);
+      sugerenciasClienteEl.classList.remove('abierto');
+    });
+
+    document.addEventListener('click', function(e) {
+      if (e.target !== inputCliente && !sugerenciasClienteEl.contains(e.target)) {
+        sugerenciasClienteEl.classList.remove('abierto');
+      }
+    });
+
+    // ---------- Autoguardado de borrador (sobrevive a la recarga que provoca la cámara en celular) ----------
+    const DRAFT_KEY = 'informeVisitaDraft_v1';
+    const CAMPOS_BORRADOR = [
+      'fecha', 'hora', 'tecnico', 'cliente', 'direccion', 'telefono', 'contacto', 'correo',
+      'tipoEquipo', 'marca', 'modelo', 'numeroSerie', 'capacidad', 'ubicacionEquipo',
+      'tipoInstalacionElec', 'voltajeElec', 'tableroElec', 'amperajeElec', 'ubicacionElec',
+      'tipoTrabajoConstr', 'materialPrincipalConstr', 'superficieConstr', 'ubicacionConstr',
+      'estadoInicial', 'diagnosticoOtro', 'trabajoRealizado', 'repuestosOtro',
+      'presionAlta', 'presionBaja', 'tempInterior', 'tempExterior', 'sobrecalentamiento',
+      'voltajeMedido', 'corrienteMedida', 'resistenciaTierra', 'requiere',
+      'observaciones', 'recomendaciones', 'estadoFinal', 'proximaMantencion'
+    ];
+    const CHECKLIST_IDS = [
+      'checklist-diagnostico', 'checklist-repuestos', 'checklist-materiales',
+      'checklist-diagnostico-elec', 'checklist-repuestos-elec', 'checklist-materiales-elec',
+      'checklist-diagnostico-constr', 'checklist-repuestos-constr', 'checklist-materiales-constr'
+    ];
+
+    function obtenerSeleccionados_(contenedorId) {
+      return Array.from(document.querySelectorAll('#' + contenedorId + ' input:checked')).map(c => c.value);
+    }
+
+    function guardarBorrador() {
+      const datos = {};
+      CAMPOS_BORRADOR.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) datos[id] = el.value;
+      });
+      const rubroMarcado = document.querySelector('input[name="rubro"]:checked');
+      datos.rubro = rubroMarcado ? rubroMarcado.value : '';
+      datos.seleccionesChecklist = {};
+      CHECKLIST_IDS.forEach(id => { datos.seleccionesChecklist[id] = obtenerSeleccionados_(id); });
+      try { localStorage.setItem(DRAFT_KEY, JSON.stringify(datos)); } catch (e) { /* localStorage lleno o no disponible */ }
+    }
+
+    function borrarBorrador() {
+      try { localStorage.removeItem(DRAFT_KEY); } catch (e) { /* nada que hacer */ }
+    }
+
+    function restaurarBorrador() {
+      let datos;
+      try {
+        const guardado = localStorage.getItem(DRAFT_KEY);
+        if (!guardado) return false;
+        datos = JSON.parse(guardado);
+      } catch (e) { return false; }
+
+      CAMPOS_BORRADOR.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && datos[id]) el.value = datos[id];
+      });
+      if (datos.rubro) {
+        const radio = document.querySelector('input[name="rubro"][value="' + datos.rubro.replace(/"/g, '\\"') + '"]');
+        if (radio) radio.checked = true;
+      }
+      CHECKLIST_IDS.forEach(id => {
+        const valores = (datos.seleccionesChecklist && datos.seleccionesChecklist[id]) || [];
+        valores.forEach(valor => {
+          const chk = document.querySelector('#' + id + ' input[value="' + valor.replace(/"/g, '\\"') + '"]');
+          if (chk) chk.checked = true;
+        });
+      });
+      return true;
+    }
+
+    let debounceBorrador = null;
+    function programarGuardadoBorrador() {
+      clearTimeout(debounceBorrador);
+      debounceBorrador = setTimeout(guardarBorrador, 400);
+    }
+    document.getElementById('form-informe').addEventListener('input', programarGuardadoBorrador);
+    document.getElementById('form-informe').addEventListener('change', programarGuardadoBorrador);
+
+    // ---------- Valores por defecto ----------
+    const seRestauroBorrador = restaurarBorrador();
+    if (!document.getElementById('fecha').value) {
+      document.getElementById('fecha').valueAsDate = new Date();
+    }
+    if (!document.getElementById('hora').value) {
+      const ahora = new Date();
+      document.getElementById('hora').value =
+        String(ahora.getHours()).padStart(2,'0') + ':' + String(ahora.getMinutes()).padStart(2,'0');
+    }
+    if (seRestauroBorrador) {
+      const aviso = document.createElement('p');
+      aviso.id = 'aviso-borrador-restaurado';
+      aviso.textContent = 'Se recuperaron los datos de tu informe en curso. Vuelve a tomar las fotos y la firma antes de enviar.';
+      aviso.style.cssText = 'background:#fff3cd;color:#664d03;padding:10px 14px;border-radius:8px;font-size:13px;margin:0 0 14px;';
+      document.querySelector('.contenedor').insertBefore(aviso, document.getElementById('form-informe'));
+    }
+
+    // ---------- Acordeón de Repuestos / Materiales / Diagnóstico ----------
+    function actualizarBadge_(contenedorId) {
+      const badge = document.getElementById('badge-' + contenedorId);
+      if (!badge) return;
+      if (contenedorId === 'opciones-rubro') {
+        const marcado = document.querySelector('#opciones-rubro input:checked');
+        badge.textContent = marcado ? marcado.value : 'Sin elegir';
+        badge.dataset.cero = marcado ? '0' : '1';
+        return;
+      }
+      const n = obtenerSeleccionados_(contenedorId).length;
+      badge.textContent = n;
+      badge.dataset.cero = n === 0 ? '1' : '0';
+    }
+
+    function abrirAcordeon_(contenedorId, abrir) {
+      const header = document.querySelector('.acordeon-header[data-target="' + contenedorId + '"]');
+      const contenido = document.getElementById(contenedorId);
+      if (!header || !contenido) return;
+      header.classList.toggle('abierto', abrir);
+      contenido.classList.toggle('abierto', abrir);
+    }
+
+    document.querySelectorAll('.acordeon-header').forEach(header => {
+      const targetId = header.dataset.target;
+      actualizarBadge_(targetId);
+      header.addEventListener('click', () => {
+        abrirAcordeon_(targetId, !header.classList.contains('abierto'));
+      });
+      document.getElementById(targetId).addEventListener('change', () => actualizarBadge_(targetId));
+    });
+
+    // Si se restauró un borrador con selecciones ya marcadas, abrir el panel para que se vean
+    CHECKLIST_IDS.forEach(id => {
+      if (obtenerSeleccionados_(id).length > 0) abrirAcordeon_(id, true);
+    });
+
+    // ---------- Rubro (Aire Acondicionado / Electricidad / Construcción) ----------
+    // Cambia qué "Datos del Equipo", Mediciones y checklists de Diagnóstico/Repuestos/Materiales
+    // se muestran, según el rubro elegido. Todos los rubros comparten el resto del formulario.
+    const TITULOS_EQUIPO_POR_RUBRO = {
+      'Aire Acondicionado': 'Datos del Equipo',
+      'Electricidad': 'Datos de la Instalación Eléctrica',
+      'Construcción y Reparaciones Menores': 'Datos del Trabajo'
+    };
+
+    function actualizarSegunRubro_() {
+      const seleccion = document.querySelector('input[name="rubro"]:checked');
+      if (!seleccion) return;
+      const rubro = seleccion.value;
+
+      document.getElementById('titulo-seccion-equipo').textContent = TITULOS_EQUIPO_POR_RUBRO[rubro] || 'Datos del Equipo';
+
+      const esAC = rubro === 'Aire Acondicionado';
+      const esElec = rubro === 'Electricidad';
+      const esConstr = rubro === 'Construcción y Reparaciones Menores';
+
+      document.getElementById('datos-equipo-ac').style.display = esAC ? 'block' : 'none';
+      document.getElementById('datos-equipo-elec').style.display = esElec ? 'block' : 'none';
+      document.getElementById('datos-equipo-constr').style.display = esConstr ? 'block' : 'none';
+
+      document.getElementById('bloque-mediciones-ac').style.display = esAC ? 'block' : 'none';
+      document.getElementById('bloque-mediciones-elec').style.display = esElec ? 'block' : 'none';
+
+      document.getElementById('bloque-diagnostico-ac').style.display = esAC ? 'block' : 'none';
+      document.getElementById('bloque-diagnostico-elec').style.display = esElec ? 'block' : 'none';
+      document.getElementById('bloque-diagnostico-constr').style.display = esConstr ? 'block' : 'none';
+
+      document.getElementById('bloque-repuestos-ac').style.display = esAC ? 'block' : 'none';
+      document.getElementById('bloque-repuestos-elec').style.display = esElec ? 'block' : 'none';
+      document.getElementById('bloque-repuestos-constr').style.display = esConstr ? 'block' : 'none';
+    }
+
+    document.querySelectorAll('input[name="rubro"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        actualizarBadge_('opciones-rubro');
+        actualizarSegunRubro_();
+      });
+    });
+
+    // Refleja el rubro ya elegido (por defecto o restaurado de un borrador) al cargar la página
+    actualizarBadge_('opciones-rubro');
+    actualizarSegunRubro_();
+
+    // ---------- Superficie de trabajo (Construcción): filas de Largo x Ancho, sumadas ----------
+    function crearFilaSuperficieConstr_() {
+      const fila = document.createElement('div');
+      fila.className = 'fila-superficie-constr';
+      fila.style.cssText = 'display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; align-items:center;';
+      fila.innerHTML = `
+        <input type="number" step="0.01" min="0" placeholder="Largo (m)" class="superficie-largo" style="flex:1; min-width:90px;">
+        <span style="color:#888;">×</span>
+        <input type="number" step="0.01" min="0" placeholder="Ancho (m)" class="superficie-ancho" style="flex:1; min-width:90px;">
+        <span class="superficie-subtotal" style="flex:1; min-width:80px; font-size:13px; color:#666; text-align:right;">0 m²</span>
+        <button type="button" class="btn-quitar-superficie" style="background:none;border:none;color:#c0392b;font-size:18px;cursor:pointer;padding:0 4px;">×</button>
+      `;
+      fila.querySelector('.btn-quitar-superficie').addEventListener('click', () => {
+        fila.remove();
+        recalcularSuperficieTotalConstr_();
+      });
+      return fila;
+    }
+
+    function recalcularSuperficieTotalConstr_() {
+      const filas = document.querySelectorAll('#filas-superficie-constr .fila-superficie-constr');
+      let total = 0;
+      const partes = [];
+      filas.forEach(fila => {
+        const largo = Number(fila.querySelector('.superficie-largo').value) || 0;
+        const ancho = Number(fila.querySelector('.superficie-ancho').value) || 0;
+        const subtotal = largo * ancho;
+        fila.querySelector('.superficie-subtotal').textContent = subtotal ? (subtotal.toFixed(2) + ' m²') : '0 m²';
+        if (largo && ancho) {
+          total += subtotal;
+          partes.push(largo + 'm x ' + ancho + 'm (' + subtotal.toFixed(2) + ' m²)');
+        }
+      });
+      document.getElementById('superficie-total-constr').textContent = total.toFixed(2) + ' m²';
+      document.getElementById('superficieConstr').value = partes.length
+        ? partes.join(', ') + ' — Total: ' + total.toFixed(2) + ' m²'
+        : '';
+    }
+
+    document.getElementById('filas-superficie-constr').appendChild(crearFilaSuperficieConstr_());
+    document.getElementById('btn-agregar-superficie').addEventListener('click', () => {
+      document.getElementById('filas-superficie-constr').appendChild(crearFilaSuperficieConstr_());
+    });
+    document.getElementById('filas-superficie-constr').addEventListener('input', recalcularSuperficieTotalConstr_);
+
+    // ---------- Acordeón de las secciones del formulario ----------
+    function abrirSeccion_(contenidoId, abrir) {
+      const header = document.querySelector('.seccion-header[data-target="' + contenidoId + '"]');
+      const contenido = document.getElementById(contenidoId);
+      if (!header || !contenido) return;
+      header.classList.toggle('abierto', abrir);
+      contenido.classList.toggle('abierto', abrir);
+    }
+
+    document.querySelectorAll('.seccion-header').forEach(header => {
+      const targetId = header.dataset.target;
+      header.addEventListener('click', () => {
+        abrirSeccion_(targetId, !header.classList.contains('abierto'));
+      });
+    });
+
+    // Sube por todos los contenedores (secciones y acordeones) que envuelven a un campo y los abre
+    function abrirTodosLosContenedores_(el) {
+      let nodo = el.closest('.seccion-contenido, .acordeon-contenido');
+      while (nodo) {
+        abrirAcordeon_(nodo.id, true);
+        abrirSeccion_(nodo.id, true);
+        nodo = nodo.parentElement ? nodo.parentElement.closest('.seccion-contenido, .acordeon-contenido') : null;
+      }
+    }
+
+    // Todo informe nuevo es un Diagnóstico: estos campos quedan siempre visibles
+    // (Estado Inicial, Trabajo Realizado, Mediciones, Requiere).
+    document.getElementById('campos-mediciones').style.display = 'block';
+    document.getElementById('campos-requiere').style.display = 'block';
+
+    // ---------- Tabs ----------
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const destino = tab.dataset.tab;
+        document.getElementById('form-informe').style.display = destino === 'form' ? 'block' : 'none';
+        document.getElementById('historial-lista').style.display = destino === 'historial' ? 'block' : 'none';
+        document.getElementById('sindefinir-lista').style.display = destino === 'sindefinir' ? 'block' : 'none';
+        document.getElementById('presupuestos-lista').style.display = destino === 'presupuestos' ? 'block' : 'none';
+        document.getElementById('editor-presupuesto-activo').style.display = 'none';
+        document.getElementById('editor-presupuesto-activo').dataset.idActivo = '';
+        if (destino === 'historial') {
+          cargarHistorialCombinado_();
+        }
+        if (destino === 'sindefinir') {
+          cargarSinDefinir_();
+        }
+        if (destino === 'presupuestos') {
+          cargarPresupuestos_();
+          cargarPresupuestosGenerados_();
+        }
+      });
+    });
+
+    // ---------- Historial (todos los tipos juntos, más reciente primero) ----------
+    function cargarHistorialCombinado_() {
+      const cont = document.getElementById('historial-resultados');
+      // Historial muestra todos los tipos de servicio, incluidos los Diagnósticos (que además
+      // siguen apareciendo en la pestaña Presupuestos mientras no tengan uno generado).
+      const todos = HISTORIAL_INICIAL;
+      if (!todos.length) {
+        cont.innerHTML = '<p style="text-align:center;color:#888;">Aún no hay informes registrados.</p>';
+        return;
+      }
+      cont.innerHTML = `
+        <table class="tabla-registros">
+          <thead>
+            <tr><th>ID</th><th>Tipo de Servicio</th><th>Cliente</th><th></th><th></th></tr>
+          </thead>
+          <tbody>
+            ${todos.map(item => {
+              const presupuesto = buscarPresupuestoPorInforme_(item['ID']);
+              return `
+              <tr data-fila-historial="${item['ID']}">
+                <td>${item['ID'] || ''}</td>
+                <td>${item['Tipo de Servicio'] === 'Diagnóstico' ? 'Informe de Visita' : (item['Tipo de Servicio'] || '')}</td>
+                <td>${item['Cliente'] || '(sin cliente)'}</td>
+                <td>${item['PDF Informe'] ? `<a class="btn-fila" href="${item['PDF Informe']}" target="_blank">Ver PDF</a>` : ''}</td>
+                <td>${presupuesto
+                  ? (presupuesto['Estado'] === 'Aprobado'
+                      ? `<span style="color:#34a853;font-weight:600;font-size:12px;">✅ Aprobado</span> <a class="btn-fila" href="${presupuesto['PDF Presupuesto']}" target="_blank">Ver PDF (Presupuesto N° ${presupuesto['ID Presupuesto']})</a>`
+                      : `<a class="btn-fila" href="${presupuesto['PDF Presupuesto']}" target="_blank" title="Reenviar Presupuesto">Reenviar (Presupuesto N° ${presupuesto['ID Presupuesto']})</a>`)
+                  : `<button type="button" class="btn-fila btn-armar-presupuesto" data-id="${item['ID']}" title="Enviar a Presupuesto" style="font-size:15px;">🧾</button>`
+                }</td>
+              </tr>
+            `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+      cont.querySelectorAll('.btn-armar-presupuesto').forEach(btn => {
+        btn.addEventListener('click', () => abrirEditorPresupuesto_(btn.dataset.id));
+      });
+    }
+
+    // Encuentra el presupuesto (individual o combinado) que incluye este ID de informe/diagnóstico.
+    function buscarPresupuestoPorInforme_(id) {
+      return PRESUPUESTOS_GENERADOS.find(p =>
+        String(p['ID Informe'] || '').split(',').map(s => s.trim()).includes(String(id))
+      ) || null;
+    }
+
+    // ---------- Presupuestos (a partir de un Diagnóstico pendiente) ----------
+    // "Eliminar" solo oculta la tarjeta de este panel (guardado en el navegador); no borra
+    // nada de la hoja de cálculo ni del informe original.
+    const DESCARTADOS_PRESUPUESTO_KEY = 'presupuestosDescartados_v1';
+    function obtenerDescartadosPresupuesto_() {
+      try { return JSON.parse(localStorage.getItem(DESCARTADOS_PRESUPUESTO_KEY) || '[]'); } catch (e) { return []; }
+    }
+    function marcarDescartadoPresupuesto_(id) {
+      const actuales = obtenerDescartadosPresupuesto_();
+      if (!actuales.includes(String(id))) actuales.push(String(id));
+      try { localStorage.setItem(DESCARTADOS_PRESUPUESTO_KEY, JSON.stringify(actuales)); } catch (e) { /* localStorage lleno o no disponible */ }
+    }
+
+    function cargarPresupuestos_() {
+      const cont = document.getElementById('presupuestos-resultados');
+      const descartados = obtenerDescartadosPresupuesto_();
+      // Solo los diagnósticos ya clasificados (con Tipo de Trabajo definido); los que faltan
+      // por clasificar se ven en la pestaña "Sin Definir".
+      const visibles = PENDIENTES_PRESUPUESTO.filter(item =>
+        item['Requiere'] && !descartados.includes(String(item['ID']))
+      );
+      if (!visibles.length) {
+        cont.innerHTML = '<p style="text-align:center;color:#888;">No hay informes de visita pendientes de presupuesto.</p>';
+        return;
+      }
+      cont.innerHTML = `
+        <button type="button" class="btn-enviar" id="btn-combinar-presupuestos" style="display:none; margin-bottom:10px;">🧾 Combinar seleccionados en un solo presupuesto</button>
+        <table class="tabla-registros">
+          <thead>
+            <tr><th></th><th>ID</th><th>Tipo de Servicio</th><th>Cliente</th><th></th><th></th></tr>
+          </thead>
+          <tbody>
+            ${visibles.map(item => `
+              <tr data-fila-pendiente="${item['ID']}">
+                <td><input type="checkbox" class="chk-combinar-presupuesto" data-id="${item['ID']}"></td>
+                <td>${item['ID'] || ''}</td>
+                <td>${item['Requiere'] || '(sin definir)'}</td>
+                <td>${item['Cliente'] || '(sin cliente)'}</td>
+                <td><button type="button" class="btn-fila btn-armar-presupuesto" data-id="${item['ID']}" title="Enviar a Presupuesto" style="font-size:15px;">🧾</button></td>
+                <td><button type="button" class="btn-fila btn-eliminar-fila btn-eliminar-pendiente" data-id="${item['ID']}">Eliminar</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      cont.querySelectorAll('.btn-armar-presupuesto').forEach(btn => {
+        btn.addEventListener('click', () => abrirEditorPresupuesto_(btn.dataset.id));
+      });
+      cont.querySelectorAll('.btn-eliminar-pendiente').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!confirm('¿Quitar este informe de visita de la lista de pendientes? Esto no borra el informe ni los datos de la hoja de cálculo, solo lo oculta de este panel.')) return;
+          marcarDescartadoPresupuesto_(btn.dataset.id);
+          cargarPresupuestos_();
+        });
+      });
+
+      // Al marcar 2 o más, aparece el botón para combinarlos en un solo presupuesto
+      // (por ejemplo, varios equipos diagnosticados en la misma visita al mismo cliente).
+      const btnCombinar = document.getElementById('btn-combinar-presupuestos');
+      cont.querySelectorAll('.chk-combinar-presupuesto').forEach(chk => {
+        chk.addEventListener('change', () => {
+          const marcados = cont.querySelectorAll('.chk-combinar-presupuesto:checked').length;
+          btnCombinar.style.display = marcados >= 2 ? 'block' : 'none';
+        });
+      });
+      btnCombinar.addEventListener('click', () => {
+        const ids = Array.from(cont.querySelectorAll('.chk-combinar-presupuesto:checked')).map(c => c.dataset.id);
+        abrirEditorPresupuestoCombinado_(ids);
+      });
+    }
+
+    // ---------- Sin Definir (diagnósticos sin Tipo de Trabajo asignado todavía) ----------
+    // Al abrir el editor y elegir el Tipo de Trabajo, y generar el presupuesto, el diagnóstico
+    // sale de aquí solo (deja de estar "pendiente sin definir") y pasa a Presupuestos Generados.
+    function cargarSinDefinir_() {
+      const cont = document.getElementById('sindefinir-resultados');
+      const descartados = obtenerDescartadosPresupuesto_();
+      const visibles = PENDIENTES_PRESUPUESTO.filter(item =>
+        !item['Requiere'] && !descartados.includes(String(item['ID']))
+      );
+      if (!visibles.length) {
+        cont.innerHTML = '<p style="text-align:center;color:#888;">No hay informes de visita por clasificar.</p>';
+        return;
+      }
+      cont.innerHTML = `
+        <table class="tabla-registros">
+          <thead>
+            <tr><th>ID</th><th>Cliente</th><th></th><th></th><th></th></tr>
+          </thead>
+          <tbody>
+            ${visibles.map(item => `
+              <tr data-fila-pendiente="${item['ID']}">
+                <td>${item['ID'] || ''}</td>
+                <td>${item['Cliente'] || '(sin cliente)'}</td>
+                <td>${item['PDF Informe'] ? `<a class="btn-fila" href="${item['PDF Informe']}" target="_blank">Ver PDF</a>` : ''}</td>
+                <td><button type="button" class="btn-fila btn-armar-presupuesto" data-id="${item['ID']}" title="Clasificar y enviar a Presupuesto" style="font-size:15px;">🧾 Clasificar</button></td>
+                <td><button type="button" class="btn-fila btn-eliminar-fila btn-eliminar-pendiente" data-id="${item['ID']}">Eliminar</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      cont.querySelectorAll('.btn-armar-presupuesto').forEach(btn => {
+        btn.addEventListener('click', () => abrirEditorPresupuesto_(btn.dataset.id));
+      });
+      cont.querySelectorAll('.btn-eliminar-pendiente').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!confirm('¿Quitar este informe de visita de la lista? Esto no borra el informe ni los datos de la hoja de cálculo, solo lo oculta de este panel.')) return;
+          marcarDescartadoPresupuesto_(btn.dataset.id);
+          cargarSinDefinir_();
+        });
+      });
+    }
+
+    function cargarPresupuestosGenerados_() {
+      const cont = document.getElementById('presupuestos-generados-resultados');
+      // Los ya aprobados salen de esta lista (el flujo terminó); quedan reflejados en Historial.
+      const pendientesDeAprobar = PRESUPUESTOS_GENERADOS.filter(item => item['Estado'] !== 'Aprobado');
+      if (!pendientesDeAprobar.length) {
+        cont.innerHTML = '<p style="text-align:center;color:#888;">Aún no se ha generado ningún presupuesto.</p>';
+        return;
+      }
+      cont.innerHTML = `
+        <table class="tabla-registros">
+          <thead>
+            <tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Tipo</th><th>Total</th><th></th><th></th><th></th></tr>
+          </thead>
+          <tbody>
+            ${pendientesDeAprobar.map(item => `
+              <tr>
+                <td>${item['ID Presupuesto'] || ''}</td>
+                <td>${item['Fecha'] || ''}</td>
+                <td>${item['Cliente'] || '(sin cliente)'}</td>
+                <td>${item['Tipo Requerido'] || ''}</td>
+                <td>$${Number(item['Total'] || 0).toLocaleString('es-CL')}</td>
+                <td>${item['PDF Presupuesto'] ? `<a class="btn-fila" href="${item['PDF Presupuesto']}" target="_blank">Ver PDF</a>` : ''}</td>
+                <td><button type="button" class="btn-fila btn-eliminar-fila btn-recuperar-presupuesto" data-id="${item['ID Presupuesto']}" title="Recuperar para modificar">Recuperar</button></td>
+                <td><button type="button" class="btn-fila btn-aprobar-presupuesto" data-id="${item['ID Presupuesto']}" title="Marcar como aprobado" style="color:#34a853;">✅ Aprobado</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      cont.querySelectorAll('.btn-aprobar-presupuesto').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!confirm('¿Marcar este presupuesto como Aprobado? Esto termina el flujo: saldrá de esta lista y quedará reflejado como aprobado en el Historial.')) return;
+          const idPresupuesto = btn.dataset.id;
+          btn.disabled = true;
+          llamarApi('aprobarPresupuesto', [idPresupuesto])
+            .then(resp => {
+              if (resp.ok) {
+                const item = PRESUPUESTOS_GENERADOS.find(p => String(p['ID Presupuesto']) === String(idPresupuesto));
+                if (item) item['Estado'] = 'Aprobado';
+                cargarPresupuestosGenerados_();
+                document.querySelector('.tab[data-tab="historial"]').click();
+              } else {
+                btn.disabled = false;
+                alert('Error al aprobar: ' + resp.error);
+              }
+            })
+            .catch(err => {
+              btn.disabled = false;
+              alert('Error: ' + err.message);
+            });
+        });
+      });
+
+      cont.querySelectorAll('.btn-recuperar-presupuesto').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!confirm('¿Recuperar este presupuesto? Se eliminará esta versión de la hoja "Presupuestos" (el PDF ya generado se mantiene en Drive) y el informe de visita volverá al Historial para modificarlo y generar uno nuevo.')) return;
+          const idPresupuesto = btn.dataset.id;
+          btn.disabled = true;
+          llamarApi('eliminarPresupuesto', [idPresupuesto])
+            .then(resp => {
+              if (resp.ok) {
+                PRESUPUESTOS_GENERADOS = PRESUPUESTOS_GENERADOS.filter(p => String(p['ID Presupuesto']) !== String(idPresupuesto));
+                cargarPresupuestosGenerados_();
+                document.querySelector('.tab[data-tab="historial"]').click();
+                if (resp.esCombinado) {
+                  setTimeout(() => abrirEditorPresupuestoCombinado_(resp.ids, resp.items, resp.tipoTrabajo), 50);
+                } else {
+                  setTimeout(() => abrirEditorPresupuesto_(resp.idInforme, resp.items, resp.tipoTrabajo), 50);
+                }
+              } else {
+                btn.disabled = false;
+                alert('Error al recuperar: ' + resp.error);
+              }
+            })
+            .catch(err => {
+              btn.disabled = false;
+              alert('Error: ' + err.message);
+            });
+        });
+      });
+    }
+
+    // Busca los datos de un informe (Cliente, Dirección, Contacto, Correo, Teléfono, Repuestos/Materiales, etc.)
+    // ya sea en el Historial o en los Pendientes de Presupuesto, para precargar el editor.
+    function buscarRegistroPorId_(id) {
+      return HISTORIAL_INICIAL.find(item => String(item['ID']) === String(id))
+        || PENDIENTES_PRESUPUESTO.find(item => String(item['ID']) === String(id))
+        || {};
+    }
+
+    // Catálogo de repuestos y materiales (mismas opciones que el checklist del informe),
+    // para elegir el detalle de cada ítem del presupuesto desde un desplegable.
+    const CATALOGO_MATERIALES = {
+      'Equipos': [
+        'Equipo Split 9.000 BTU', 'Equipo Split 12.000 BTU', 'Equipo Split 24.000 BTU',
+        'Equipo Split 36.000 BTU', 'Equipo Split 48.000 BTU', 'Equipo Split 60.000 BTU',
+        'Equipo Split 120.000 BTU'
+      ],
+      'Repuestos': [
+        'Capacitor 25uF', 'Capacitor 35uF', 'Capacitor 45uF', 'Contactor', 'Compresor',
+        'Motor ventilador unidad interior', 'Motor ventilador unidad exterior',
+        'Placa electrónica / tarjeta de control', 'Válvula de expansión', 'Sensor / termostato',
+        'Bomba de condensado', 'Filtro de aire', 'Control remoto', 'Pilas del control remoto'
+      ],
+      'Materiales AC': [
+        'Gas refrigerante R410A', 'Gas refrigerante R22', 'Gas refrigerante R32', 'Cañería de cobre',
+        'Aislante térmico (Armaflex)', 'Soldadura de plata', 'Nitrógeno', 'Cable eléctrico',
+        'Terminales / conectores eléctricos', 'Abrazaderas / soportes', 'Manguera de drenaje',
+        'Cinta aislante', 'Desengrasante / limpia serpentín'
+      ],
+      'Repuestos Electricidad': [
+        'Automático (breaker) 10A', 'Automático (breaker) 16A', 'Automático (breaker) 20A',
+        'Automático (breaker) 32A', 'Automático (breaker) 40A', 'Diferencial (protección de fuga)',
+        'Fusible', 'Enchufe / toma corriente', 'Interruptor simple', 'Interruptor de cruce',
+        'Portalámparas', 'Balastro', 'Partidor', 'Contactor eléctrico', 'Timbre / citófono', 'Tablero eléctrico'
+      ],
+      'Materiales Electricidad': [
+        'Cable eléctrico 1.5mm', 'Cable eléctrico 2.5mm', 'Cable eléctrico 4mm', 'Cable eléctrico 6mm',
+        'Tubo corrugado / conduit', 'Cinta aislante', 'Terminales / conectores eléctricos',
+        'Caja de paso / registro', 'Canaleta plástica', 'Amarras plásticas', 'Prensaestopa'
+      ],
+      'Repuestos Construcción': [
+        'Bisagras', 'Chapa / cerradura', 'Perfil de aluminio', 'Vidrio',
+        'Plancha de yeso cartón (volcanita)', 'Teja / plancha de zinc', 'Llave de paso', 'Grifería'
+      ],
+      'Materiales Construcción': [
+        'Cemento', 'Arena', 'Fierro (armadura)', 'Ladrillo / bloque', 'Pintura interior', 'Pintura exterior',
+        'Sellador / silicona', 'Impermeabilizante', 'Madera / tablas', 'Clavos / tornillos',
+        'Cerámica', 'Porcelanato', 'Adhesivo para cerámica / porcelanato', 'Fragüe / boquilla'
+      ],
+      'Mano de Obra': [
+        'Mano de Obra'
+      ]
+    };
+    const IVA_TASA = 0.19;
+
+    function crearFilaItemPresupuesto_(prellenado) {
+      const fila = document.createElement('div');
+      fila.className = 'fila-item-presupuesto';
+      fila.style.cssText = 'display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; align-items:center;';
+      const desc = (prellenado && prellenado.descripcion) || '';
+      const todasLasOpciones = Object.values(CATALOGO_MATERIALES).flat();
+      const esOtro = desc && !todasLasOpciones.includes(desc);
+      const opciones = Object.entries(CATALOGO_MATERIALES).map(([grupo, items]) => `
+        <optgroup label="${grupo}">
+          ${items.map(v => `<option value="${v}" ${v === desc ? 'selected' : ''}>${v}</option>`).join('')}
+        </optgroup>
+      `).join('');
+      fila.innerHTML = `
+        <select class="item-descripcion-select" style="flex:2; min-width:140px;">
+          <option value="">Selecciona un ítem…</option>
+          ${opciones}
+          <option value="__otro__" ${esOtro ? 'selected' : ''}>Otro (especificar)</option>
+        </select>
+        <input type="text" placeholder="Especificar" class="item-descripcion-otro" value="${esOtro ? desc.replace(/"/g, '&quot;') : ''}" style="display:${esOtro ? 'block' : 'none'}; flex:2; min-width:120px;">
+        <input type="text" placeholder="Marca" class="item-marca" value="${((prellenado && prellenado.marca) || '').replace(/"/g, '&quot;')}" style="flex:1; min-width:80px;">
+        <input type="number" placeholder="Cant." class="item-cantidad" min="0" value="${(prellenado && prellenado.cantidad) || ''}" style="flex:1; min-width:60px;">
+        <input type="number" placeholder="Valor unit." class="item-precio" min="0" value="${(prellenado && prellenado.precioUnitario) || ''}" style="flex:1; min-width:80px;">
+        <span class="item-subtotal" style="flex:1; min-width:80px; font-size:12px; color:#666; text-align:right; white-space:nowrap;">$0</span>
+        <button type="button" class="btn-quitar-item" style="background:none;border:none;color:#c0392b;font-size:18px;cursor:pointer;padding:0 4px;">×</button>
+      `;
+      const select = fila.querySelector('.item-descripcion-select');
+      const otro = fila.querySelector('.item-descripcion-otro');
+      select.addEventListener('change', () => {
+        otro.style.display = select.value === '__otro__' ? 'block' : 'none';
+      });
+      fila.querySelector('.btn-quitar-item').addEventListener('click', () => fila.remove());
+      return fila;
+    }
+
+    function descripcionDeFila_(fila) {
+      const select = fila.querySelector('.item-descripcion-select');
+      if (select.value === '__otro__') return fila.querySelector('.item-descripcion-otro').value.trim();
+      return select.value;
+    }
+
+    function abrirEditorPresupuesto_(id, itemsPrellenados, tipoTrabajoPrellenado) {
+      const editor = document.getElementById('editor-presupuesto-activo');
+      const yaAbiertoParaEsteId = editor.style.display === 'block' && editor.dataset.idActivo === String(id);
+      if (yaAbiertoParaEsteId) {
+        editor.style.display = 'none';
+        editor.dataset.idActivo = '';
+        return;
+      }
+
+      const registro = buscarRegistroPorId_(id);
+      editor.dataset.idActivo = String(id);
+      editor.innerHTML = `
+        <div class="seccion" style="margin-bottom:0;">
+          <h3 style="margin:0 0 8px;">Presupuesto para Informe de Visita N° ${id}</h3>
+          <div style="font-size:13px; color:#444; margin-bottom:12px; line-height:1.7;">
+            <div><strong>Cliente:</strong> ${registro['Cliente'] || ''}</div>
+            <div><strong>Dirección:</strong> ${registro['Dirección'] || ''}</div>
+            <div><strong>Contacto:</strong> ${registro['Contacto'] || ''}</div>
+            <div><strong>Correo:</strong> ${registro['Correo'] || ''}</div>
+            <div><strong>Teléfono:</strong> ${registro['Teléfono'] || ''}</div>
+          </div>
+          <label>Tipo de Trabajo</label>
+          <select class="tipo-trabajo-presupuesto" style="margin-bottom:10px;">
+            <option value="">Selecciona…</option>
+            <option value="Instalación">Instalación</option>
+            <option value="Reparación">Reparación</option>
+            <option value="Mantención">Mantención</option>
+          </select>
+          <div class="datos-equipo-presupuesto" style="display:none; font-size:13px; color:#444; margin-bottom:12px; line-height:1.7;">
+            <div><strong>Tipo de Equipo:</strong> ${registro['Tipo de Equipo'] || ''}</div>
+            <div><strong>Marca:</strong> ${registro['Marca'] || ''}</div>
+            <div><strong>Modelo:</strong> ${registro['Modelo'] || ''}</div>
+            <div><strong>N° Serie:</strong> ${registro['N° Serie'] || ''}</div>
+            <div><strong>Capacidad (BTU):</strong> ${registro['Capacidad (BTU)'] || ''}</div>
+            <div><strong>Ubicación:</strong> ${registro['Ubicación del Equipo'] || ''}</div>
+          </div>
+          <div class="items-presupuesto"></div>
+          <button type="button" class="btn-limpiar btn-agregar-item">+ Agregar ítem</button>
+          <div style="margin-top:12px; font-size:14px;">
+            <div style="display:flex; justify-content:space-between;"><span>Subtotal Neto:</span><span class="subtotal-neto-presupuesto">$0</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>IVA (19%):</span><span class="iva-presupuesto">$0</span></div>
+            <div style="display:flex; justify-content:space-between; font-weight:700; font-size:16px; margin-top:4px;"><span>Total:</span><span class="total-presupuesto">$0</span></div>
+          </div>
+          <button type="button" class="btn-enviar btn-generar-presupuesto" style="margin-top:10px;">Generar Presupuesto</button>
+        </div>
+      `;
+      const contenedorItems = editor.querySelector('.items-presupuesto');
+      if (itemsPrellenados && itemsPrellenados.length) {
+        itemsPrellenados.forEach(it => contenedorItems.appendChild(crearFilaItemPresupuesto_(it)));
+      } else {
+        contenedorItems.appendChild(crearFilaItemPresupuesto_());
+      }
+
+      function recalcularTotal() {
+        let subtotalNeto = 0;
+        editor.querySelectorAll('.fila-item-presupuesto').forEach(f => {
+          const cant = Number(f.querySelector('.item-cantidad').value) || 0;
+          const precio = Number(f.querySelector('.item-precio').value) || 0;
+          const subtotal = cant * precio;
+          f.querySelector('.item-subtotal').textContent = '$' + subtotal.toLocaleString('es-CL');
+          subtotalNeto += subtotal;
+        });
+        const iva = subtotalNeto * IVA_TASA;
+        editor.querySelector('.subtotal-neto-presupuesto').textContent = '$' + subtotalNeto.toLocaleString('es-CL');
+        editor.querySelector('.iva-presupuesto').textContent = '$' + Math.round(iva).toLocaleString('es-CL');
+        editor.querySelector('.total-presupuesto').textContent = '$' + Math.round(subtotalNeto + iva).toLocaleString('es-CL');
+      }
+      editor.addEventListener('input', recalcularTotal);
+      editor.addEventListener('change', recalcularTotal);
+
+      // Los datos del equipo solo son relevantes si el trabajo es una Reparación o Mantención
+      // (en una Instalación nueva todavía no hay equipo instalado que mostrar).
+      editor.querySelector('.tipo-trabajo-presupuesto').addEventListener('change', function() {
+        const mostrar = this.value === 'Reparación' || this.value === 'Mantención';
+        editor.querySelector('.datos-equipo-presupuesto').style.display = mostrar ? 'block' : 'none';
+      });
+      // Si no viene un tipo prellenado explícito (p.ej. al recuperar un presupuesto), se usa el
+      // "Requiere" que el técnico ya había definido en el diagnóstico, si lo tenía.
+      const tipoAPrellenar = tipoTrabajoPrellenado || registro['Requiere'];
+      if (tipoAPrellenar) {
+        const selectTipo = editor.querySelector('.tipo-trabajo-presupuesto');
+        selectTipo.value = tipoAPrellenar;
+        selectTipo.dispatchEvent(new Event('change'));
+      }
+
+      editor.querySelector('.btn-agregar-item').addEventListener('click', () => {
+        contenedorItems.appendChild(crearFilaItemPresupuesto_());
+      });
+
+      editor.querySelector('.btn-generar-presupuesto').addEventListener('click', () => {
+        const tipoTrabajo = editor.querySelector('.tipo-trabajo-presupuesto').value;
+        if (!tipoTrabajo) { alert('Selecciona el Tipo de Trabajo (Instalación, Reparación o Mantención).'); return; }
+
+        const items = Array.from(editor.querySelectorAll('.fila-item-presupuesto')).map(f => ({
+          descripcion: descripcionDeFila_(f),
+          marca: f.querySelector('.item-marca').value,
+          cantidad: Number(f.querySelector('.item-cantidad').value) || 0,
+          precioUnitario: Number(f.querySelector('.item-precio').value) || 0
+        })).filter(it => it.descripcion && it.cantidad > 0);
+
+        if (!items.length) { alert('Agrega al menos un ítem con descripción y cantidad.'); return; }
+
+        const boton = editor.querySelector('.btn-generar-presupuesto');
+        boton.disabled = true;
+        boton.textContent = 'Generando...';
+
+        llamarApi('generarPresupuesto', [id, items, tipoTrabajo])
+          .then(resp => {
+            if (resp.ok) {
+              editor.innerHTML = '<p style="color:#34a853;font-weight:600;">Presupuesto N° ' + resp.id + ' generado.</p>'
+                + '<a href="' + resp.pdfUrl + '" target="_blank">Ver PDF del Presupuesto →</a>';
+              PENDIENTES_PRESUPUESTO = PENDIENTES_PRESUPUESTO.filter(p => String(p['ID']) !== String(id));
+              const filaPendiente = document.querySelector('[data-fila-pendiente="' + id + '"]');
+              if (filaPendiente) filaPendiente.remove();
+              const filaHistorial = document.querySelector('[data-fila-historial="' + id + '"]');
+              if (filaHistorial) filaHistorial.remove();
+
+              // Se agrega al instante a "Presupuestos Generados", sin esperar a recargar la página.
+              PRESUPUESTOS_GENERADOS.unshift({
+                'ID Presupuesto': resp.id,
+                'Fecha': resp.fecha,
+                'Cliente': resp.cliente,
+                'Tipo Requerido': resp.tipoTrabajo,
+                'Total': resp.total,
+                'PDF Presupuesto': resp.pdfUrl
+              });
+              cargarPresupuestosGenerados_();
+            } else {
+              boton.disabled = false;
+              boton.textContent = 'Generar Presupuesto';
+              alert('Error al generar presupuesto: ' + resp.error);
+            }
+          })
+          .catch(err => {
+            boton.disabled = false;
+            boton.textContent = 'Generar Presupuesto';
+            alert('Error: ' + err.message);
+          });
+      });
+
+      editor.style.display = 'block';
+      recalcularTotal();
+    }
+
+    // Presupuesto combinado: mismo editor que el individual, pero con una sección de ítems
+    // separada por cada equipo/diagnóstico elegido, y un total único al final.
+    function abrirEditorPresupuestoCombinado_(ids, gruposItemsPrellenados, tipoTrabajoPrellenado) {
+      const editor = document.getElementById('editor-presupuesto-activo');
+      const claveActiva = 'combo:' + ids.join(',');
+      const yaAbiertoParaEstos = editor.style.display === 'block' && editor.dataset.idActivo === claveActiva;
+      if (yaAbiertoParaEstos) {
+        editor.style.display = 'none';
+        editor.dataset.idActivo = '';
+        return;
+      }
+
+      const registros = ids.map(id => buscarRegistroPorId_(id));
+      const primero = registros[0] || {};
+      editor.dataset.idActivo = claveActiva;
+
+      editor.innerHTML = `
+        <div class="seccion" style="margin-bottom:0;">
+          <h3 style="margin:0 0 8px;">Presupuesto combinado — ${ids.length} equipos (Informes de Visita N° ${ids.join(', ')})</h3>
+          <div style="font-size:13px; color:#444; margin-bottom:12px; line-height:1.7;">
+            <div><strong>Cliente:</strong> ${primero['Cliente'] || ''}</div>
+            <div><strong>Dirección:</strong> ${primero['Dirección'] || ''}</div>
+            <div><strong>Contacto:</strong> ${primero['Contacto'] || ''}</div>
+            <div><strong>Correo:</strong> ${primero['Correo'] || ''}</div>
+            <div><strong>Teléfono:</strong> ${primero['Teléfono'] || ''}</div>
+          </div>
+          <label>Tipo de Trabajo</label>
+          <select class="tipo-trabajo-presupuesto" style="margin-bottom:14px;">
+            <option value="">Selecciona…</option>
+            <option value="Instalación">Instalación</option>
+            <option value="Reparación">Reparación</option>
+            <option value="Mantención">Mantención</option>
+          </select>
+          <div class="grupos-equipo-presupuesto"></div>
+          <div style="margin-top:12px; font-size:14px;">
+            <div style="display:flex; justify-content:space-between;"><span>Subtotal Neto:</span><span class="subtotal-neto-presupuesto">$0</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>IVA (19%):</span><span class="iva-presupuesto">$0</span></div>
+            <div style="display:flex; justify-content:space-between; font-weight:700; font-size:16px; margin-top:4px;"><span>Total:</span><span class="total-presupuesto">$0</span></div>
+          </div>
+          <button type="button" class="btn-enviar btn-generar-presupuesto" style="margin-top:10px;">Generar Presupuesto Combinado</button>
+        </div>
+      `;
+
+      const contenedorGrupos = editor.querySelector('.grupos-equipo-presupuesto');
+      registros.forEach((registro, i) => {
+        const nombreEquipo = [registro['Tipo de Equipo'], registro['Marca'], registro['Modelo']].filter(Boolean).join(' ');
+        const grupo = document.createElement('div');
+        grupo.className = 'grupo-equipo-presupuesto';
+        grupo.dataset.idInforme = ids[i];
+        grupo.style.cssText = 'border-top:2px solid var(--gris); margin-top:14px; padding-top:10px;';
+        grupo.innerHTML = `
+          <div style="font-weight:700; font-size:13px; color:var(--azul); margin-bottom:6px;">
+            Equipo ${i + 1}${nombreEquipo ? ' — ' + nombreEquipo : ''} (N° ${ids[i]})
+          </div>
+          <div style="font-size:12px; color:#666; margin-bottom:8px;">
+            ${registro['Ubicación del Equipo'] ? 'Ubicación: ' + registro['Ubicación del Equipo'] : ''}
+            ${registro['N° Serie'] ? ' · N° Serie: ' + registro['N° Serie'] : ''}
+          </div>
+          <div class="items-presupuesto"></div>
+          <button type="button" class="btn-limpiar btn-agregar-item">+ Agregar ítem a este equipo</button>
+        `;
+        contenedorGrupos.appendChild(grupo);
+
+        const prellenadoGrupo = gruposItemsPrellenados && gruposItemsPrellenados.find(g => String(g.idInforme) === String(ids[i]));
+        const itemsIniciales = (prellenadoGrupo && prellenadoGrupo.items && prellenadoGrupo.items.length) ? prellenadoGrupo.items : [null];
+        const contenedorItems = grupo.querySelector('.items-presupuesto');
+        itemsIniciales.forEach(it => contenedorItems.appendChild(crearFilaItemPresupuesto_(it)));
+
+        grupo.querySelector('.btn-agregar-item').addEventListener('click', () => {
+          contenedorItems.appendChild(crearFilaItemPresupuesto_());
+        });
+      });
+
+      function recalcularTotal() {
+        let subtotalNeto = 0;
+        editor.querySelectorAll('.fila-item-presupuesto').forEach(f => {
+          const cant = Number(f.querySelector('.item-cantidad').value) || 0;
+          const precio = Number(f.querySelector('.item-precio').value) || 0;
+          const subtotal = cant * precio;
+          f.querySelector('.item-subtotal').textContent = '$' + subtotal.toLocaleString('es-CL');
+          subtotalNeto += subtotal;
+        });
+        const iva = subtotalNeto * IVA_TASA;
+        editor.querySelector('.subtotal-neto-presupuesto').textContent = '$' + subtotalNeto.toLocaleString('es-CL');
+        editor.querySelector('.iva-presupuesto').textContent = '$' + Math.round(iva).toLocaleString('es-CL');
+        editor.querySelector('.total-presupuesto').textContent = '$' + Math.round(subtotalNeto + iva).toLocaleString('es-CL');
+      }
+      editor.addEventListener('input', recalcularTotal);
+      editor.addEventListener('change', recalcularTotal);
+
+      if (tipoTrabajoPrellenado) {
+        editor.querySelector('.tipo-trabajo-presupuesto').value = tipoTrabajoPrellenado;
+      }
+
+      editor.querySelector('.btn-generar-presupuesto').addEventListener('click', () => {
+        const tipoTrabajo = editor.querySelector('.tipo-trabajo-presupuesto').value;
+        if (!tipoTrabajo) { alert('Selecciona el Tipo de Trabajo (Instalación, Reparación o Mantención).'); return; }
+
+        const gruposItems = Array.from(editor.querySelectorAll('.grupo-equipo-presupuesto')).map(grupo => {
+          const items = Array.from(grupo.querySelectorAll('.fila-item-presupuesto')).map(f => ({
+            descripcion: descripcionDeFila_(f),
+            marca: f.querySelector('.item-marca').value,
+            cantidad: Number(f.querySelector('.item-cantidad').value) || 0,
+            precioUnitario: Number(f.querySelector('.item-precio').value) || 0
+          })).filter(it => it.descripcion && it.cantidad > 0);
+          return { idInforme: grupo.dataset.idInforme, items: items };
+        });
+
+        const totalItems = gruposItems.reduce((acc, g) => acc + g.items.length, 0);
+        if (!totalItems) { alert('Agrega al menos un ítem con descripción y cantidad en algún equipo.'); return; }
+
+        const boton = editor.querySelector('.btn-generar-presupuesto');
+        boton.disabled = true;
+        boton.textContent = 'Generando...';
+
+        llamarApi('generarPresupuestoCombinado', [ids, gruposItems, tipoTrabajo])
+          .then(resp => {
+            if (resp.ok) {
+              editor.innerHTML = '<p style="color:#34a853;font-weight:600;">Presupuesto N° ' + resp.id + ' generado.</p>'
+                + '<a href="' + resp.pdfUrl + '" target="_blank">Ver PDF del Presupuesto →</a>';
+              PENDIENTES_PRESUPUESTO = PENDIENTES_PRESUPUESTO.filter(p => !ids.includes(String(p['ID'])));
+              ids.forEach(id => {
+                const filaPendiente = document.querySelector('[data-fila-pendiente="' + id + '"]');
+                if (filaPendiente) filaPendiente.remove();
+                const filaHistorial = document.querySelector('[data-fila-historial="' + id + '"]');
+                if (filaHistorial) filaHistorial.remove();
+              });
+
+              PRESUPUESTOS_GENERADOS.unshift({
+                'ID Presupuesto': resp.id,
+                'Fecha': resp.fecha,
+                'Cliente': resp.cliente,
+                'Tipo Requerido': resp.tipoTrabajo,
+                'Total': resp.total,
+                'PDF Presupuesto': resp.pdfUrl
+              });
+              cargarPresupuestosGenerados_();
+            } else {
+              boton.disabled = false;
+              boton.textContent = 'Generar Presupuesto Combinado';
+              alert('Error al generar presupuesto: ' + resp.error);
+            }
+          })
+          .catch(err => {
+            boton.disabled = false;
+            boton.textContent = 'Generar Presupuesto Combinado';
+            alert('Error: ' + err.message);
+          });
+      });
+
+      editor.style.display = 'block';
+      recalcularTotal();
+    }
+
+    // ---------- Manejo de fotos ----------
+    function configurarFoto(inputId, boxId, txtId) {
+      const input = document.getElementById(inputId);
+      const box = document.getElementById(boxId);
+      const txt = document.getElementById(txtId);
+      input.addEventListener('change', () => {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+          box.dataset.base64 = e.target.result;
+          txt.style.display = 'none';
+          let img = box.querySelector('img');
+          if (!img) {
+            img = document.createElement('img');
+            box.appendChild(img);
+          }
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+    configurarFoto('fotoAntes', 'box-antes', 'txt-antes');
+    configurarFoto('fotoDespues', 'box-despues', 'txt-despues');
+
+    // ---------- Firma (canvas) ----------
+    const canvas = document.getElementById('firma');
+    const ctx = canvas.getContext('2d');
+    function ajustarCanvas() {
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = canvas.offsetHeight * ratio;
+      ctx.scale(ratio, ratio);
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#1a1a1a';
+    }
+    function reajustarCanvasPreservandoFirma_() {
+      const habiaFirma = !firmaVacia();
+      const dataUrl = habiaFirma ? canvas.toDataURL() : null;
+      ajustarCanvas();
+      if (dataUrl) {
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0, canvas.offsetWidth, canvas.offsetHeight);
+        img.src = dataUrl;
+      }
+    }
+    ajustarCanvas();
+    window.addEventListener('resize', reajustarCanvasPreservandoFirma_);
+
+    // La sección "Firma del Cliente" arranca cerrada (canvas con ancho/alto 0 mientras esté oculta).
+    // Cada vez que se abre hay que recalcular su tamaño real, si no, no se puede dibujar encima.
+    const headerFirma = document.querySelector('.seccion-header[data-target="contenido-firma-del-cliente"]');
+    if (headerFirma) {
+      headerFirma.addEventListener('click', () => {
+        if (document.getElementById('contenido-firma-del-cliente').classList.contains('abierto')) {
+          reajustarCanvasPreservandoFirma_();
+        }
+      });
+    }
+
+    let dibujando = false;
+    let ultimoPunto = null;
+
+    function obtenerPos(evt) {
+      const rect = canvas.getBoundingClientRect();
+      const punto = evt.touches ? evt.touches[0] : evt;
+      return { x: punto.clientX - rect.left, y: punto.clientY - rect.top };
+    }
+    function iniciar(evt) {
+      dibujando = true;
+      ultimoPunto = obtenerPos(evt);
+    }
+    function dibujar(evt) {
+      if (!dibujando) return;
+      evt.preventDefault();
+      const pos = obtenerPos(evt);
+      ctx.beginPath();
+      ctx.moveTo(ultimoPunto.x, ultimoPunto.y);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+      ultimoPunto = pos;
+    }
+    function terminar() { dibujando = false; }
+
+    canvas.addEventListener('mousedown', iniciar);
+    canvas.addEventListener('mousemove', dibujar);
+    canvas.addEventListener('mouseup', terminar);
+    canvas.addEventListener('mouseleave', terminar);
+    canvas.addEventListener('touchstart', iniciar);
+    canvas.addEventListener('touchmove', dibujar);
+    canvas.addEventListener('touchend', terminar);
+
+    document.getElementById('limpiarFirma').addEventListener('click', () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    function firmaVacia() {
+      const blanco = document.createElement('canvas');
+      blanco.width = canvas.width; blanco.height = canvas.height;
+      return canvas.toDataURL() === blanco.toDataURL();
+    }
+
+    // ---------- Envío del formulario ----------
+    document.getElementById('form-informe').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const form = e.target;
+
+      // Si falta un campo obligatorio dentro de una sección o acordeón cerrado, abrirlos y llevar al usuario ahí
+      if (!form.checkValidity()) {
+        const invalido = form.querySelector(':invalid');
+        if (invalido) {
+          abrirTodosLosContenedores_(invalido);
+          invalido.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => { invalido.focus(); form.reportValidity(); }, 300);
+        }
+        return;
+      }
+
+      const rubroSeleccionado = document.querySelector('input[name="rubro"]:checked');
+      const rubro = rubroSeleccionado ? rubroSeleccionado.value : 'Aire Acondicionado';
+
+      // Según el rubro, el checklist de diagnóstico y el de repuestos/materiales correcto es uno distinto.
+      const CHECKLISTS_DIAGNOSTICO_POR_RUBRO = {
+        'Aire Acondicionado': ['checklist-diagnostico'],
+        'Electricidad': ['checklist-diagnostico-elec'],
+        'Construcción y Reparaciones Menores': ['checklist-diagnostico-constr']
+      };
+      const CHECKLISTS_REPUESTOS_POR_RUBRO = {
+        'Aire Acondicionado': ['checklist-repuestos', 'checklist-materiales'],
+        'Electricidad': ['checklist-repuestos-elec', 'checklist-materiales-elec'],
+        'Construcción y Reparaciones Menores': ['checklist-repuestos-constr', 'checklist-materiales-constr']
+      };
+
+      const data = {
+        fecha: document.getElementById('fecha').value,
+        hora: document.getElementById('hora').value,
+        tecnico: document.getElementById('tecnico').value,
+        tipoServicio: 'Diagnóstico',
+        rubro: rubro,
+        cliente: document.getElementById('cliente').value,
+        direccion: document.getElementById('direccion').value,
+        telefono: document.getElementById('telefono').value,
+        contacto: document.getElementById('contacto').value,
+        correo: document.getElementById('correo').value,
+        tipoEquipo: document.getElementById('tipoEquipo').value,
+        marca: document.getElementById('marca').value,
+        modelo: document.getElementById('modelo').value,
+        numeroSerie: document.getElementById('numeroSerie').value,
+        capacidad: document.getElementById('capacidad').value,
+        ubicacionEquipo: document.getElementById('ubicacionEquipo').value,
+        tipoInstalacionElec: document.getElementById('tipoInstalacionElec').value,
+        voltajeElec: document.getElementById('voltajeElec').value,
+        tableroElec: document.getElementById('tableroElec').value,
+        amperajeElec: document.getElementById('amperajeElec').value,
+        ubicacionElec: document.getElementById('ubicacionElec').value,
+        tipoTrabajoConstr: document.getElementById('tipoTrabajoConstr').value,
+        materialPrincipalConstr: document.getElementById('materialPrincipalConstr').value,
+        superficieConstr: document.getElementById('superficieConstr').value,
+        ubicacionConstr: document.getElementById('ubicacionConstr').value,
+        estadoInicial: document.getElementById('estadoInicial').value,
+        diagnostico: [
+          ...(CHECKLISTS_DIAGNOSTICO_POR_RUBRO[rubro] || []).flatMap(id => obtenerSeleccionados_(id)),
+          ...(document.getElementById('diagnosticoOtro').value ? [document.getElementById('diagnosticoOtro').value] : [])
+        ].join(', '),
+        trabajoRealizado: document.getElementById('trabajoRealizado').value,
+        presionAlta: document.getElementById('presionAlta').value,
+        presionBaja: document.getElementById('presionBaja').value,
+        tempInterior: document.getElementById('tempInterior').value,
+        tempExterior: document.getElementById('tempExterior').value,
+        sobrecalentamiento: document.getElementById('sobrecalentamiento').value,
+        voltajeMedido: document.getElementById('voltajeMedido').value,
+        corrienteMedida: document.getElementById('corrienteMedida').value,
+        resistenciaTierra: document.getElementById('resistenciaTierra').value,
+        requiere: document.getElementById('requiere').value,
+        repuestos: [
+          ...(CHECKLISTS_REPUESTOS_POR_RUBRO[rubro] || []).flatMap(id => obtenerSeleccionados_(id)),
+          ...(document.getElementById('repuestosOtro').value ? [document.getElementById('repuestosOtro').value] : [])
+        ].join(', '),
+        observaciones: document.getElementById('observaciones').value,
+        recomendaciones: document.getElementById('recomendaciones').value,
+        estadoFinal: document.getElementById('estadoFinal').value,
+        proximaMantencion: document.getElementById('proximaMantencion').value,
+        fotoAntes: document.getElementById('box-antes').dataset.base64 || '',
+        fotoDespues: document.getElementById('box-despues').dataset.base64 || '',
+        firma: firmaVacia() ? '' : canvas.toDataURL('image/png')
+      };
+
+      document.getElementById('overlay').style.display = 'flex';
+      document.getElementById('btnEnviar').disabled = true;
+
+      llamarApi('guardarInforme', [data])
+        .then(function(resp) {
+          document.getElementById('overlay').style.display = 'none';
+          document.getElementById('btnEnviar').disabled = false;
+          if (resp.ok) {
+            borrarBorrador();
+            document.getElementById('form-informe').style.display = 'none';
+            document.getElementById('exito').style.display = 'block';
+            document.getElementById('btnClasificarAhora').dataset.idInforme = resp.id;
+
+            if (resp.pendienteSync) {
+              // Sin conexión: quedó en el celular, se sube solo cuando vuelva la señal.
+              document.getElementById('exito-id').innerText = 'Guardado en el celular. Se enviará solo cuando haya conexión.';
+              document.getElementById('link-pdf').style.display = 'none';
+              document.getElementById('btnClasificarAhora').style.display = 'none';
+            } else {
+              document.getElementById('exito-id').innerText = 'N° ' + resp.id;
+              document.getElementById('link-pdf').style.display = '';
+              document.getElementById('link-pdf').href = resp.pdfUrl;
+              document.getElementById('btnClasificarAhora').style.display = '';
+
+              // Se agrega al instante a "Sin Definir" (o a la lista de pendientes clasificados,
+              // si ya venía con "Requiere"), sin esperar a recargar la página.
+              PENDIENTES_PRESUPUESTO.unshift({
+                'ID': resp.id,
+                'Fecha': data.fecha,
+                'Hora': data.hora,
+                'Técnico': data.tecnico,
+                'Tipo de Servicio': data.tipoServicio,
+                'Cliente': data.cliente,
+                'Dirección': data.direccion,
+                'Teléfono': data.telefono,
+                'Contacto': data.contacto,
+                'Correo': data.correo,
+                'Tipo de Equipo': data.tipoEquipo,
+                'Marca': data.marca,
+                'Modelo': data.modelo,
+                'N° Serie': data.numeroSerie,
+                'Capacidad (BTU)': data.capacidad,
+                'Ubicación del Equipo': data.ubicacionEquipo,
+                'Trabajo Realizado': data.trabajoRealizado,
+                'Repuestos/Materiales': data.repuestos,
+                'Diagnóstico': data.diagnostico,
+                'Requiere': data.requiere || '',
+                'Rubro': data.rubro,
+                'Tipo de Instalación (Elec)': data.tipoInstalacionElec,
+                'Voltaje (Elec)': data.voltajeElec,
+                'Tablero (Elec)': data.tableroElec,
+                'Amperaje (Elec)': data.amperajeElec,
+                'Ubicación (Elec)': data.ubicacionElec,
+                'Tipo de Trabajo (Constr)': data.tipoTrabajoConstr,
+                'Material Principal (Constr)': data.materialPrincipalConstr,
+                'Superficie (Constr)': data.superficieConstr,
+                'Ubicación (Constr)': data.ubicacionConstr,
+                'PDF Informe': resp.pdfUrl
+              });
+            }
+          } else {
+            alert('Error al guardar: ' + resp.error);
+          }
+        })
+        .catch(function(err) {
+          document.getElementById('overlay').style.display = 'none';
+          document.getElementById('btnEnviar').disabled = false;
+          alert('Error: ' + err.message);
+        });
+    });
+
+    function limpiarFormularioCompleto() {
+      borrarBorrador();
+      document.getElementById('form-informe').reset();
+      document.querySelectorAll('.foto-box img').forEach(img => img.remove());
+      document.getElementById('txt-antes').style.display = 'block';
+      document.getElementById('txt-despues').style.display = 'block';
+      document.getElementById('box-antes').dataset.base64 = '';
+      document.getElementById('box-despues').dataset.base64 = '';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      document.getElementById('fecha').valueAsDate = new Date();
+      const ahora = new Date();
+      document.getElementById('hora').value =
+        String(ahora.getHours()).padStart(2,'0') + ':' + String(ahora.getMinutes()).padStart(2,'0');
+
+      // form.reset() no dispara 'change', así que los contadores y paneles hay que limpiarlos a mano
+      CHECKLIST_IDS.forEach(id => {
+        actualizarBadge_(id);
+        abrirAcordeon_(id, false);
+      });
+      abrirSeccion_('contenido-diagnostico-y-trabajo-realizado', false);
+
+      // form.reset() vuelve el radio de Rubro a "Aire Acondicionado" (el que tiene "checked" en el HTML);
+      // hay que refrescar a mano el badge y qué secciones/checklists se muestran para ese rubro.
+      actualizarBadge_('opciones-rubro');
+      actualizarSegunRubro_();
+
+      // Vuelve a dejar la calculadora de Superficie con una sola fila vacía
+      document.getElementById('filas-superficie-constr').innerHTML = '';
+      document.getElementById('filas-superficie-constr').appendChild(crearFilaSuperficieConstr_());
+      recalcularSuperficieTotalConstr_();
+
+      const avisoRestaurado = document.getElementById('aviso-borrador-restaurado');
+      if (avisoRestaurado) avisoRestaurado.remove();
+
+      document.getElementById('exito').style.display = 'none';
+      document.getElementById('link-pdf').style.display = '';
+      document.getElementById('btnClasificarAhora').style.display = '';
+      document.getElementById('form-informe').style.display = 'block';
+    }
+
+    document.getElementById('btnNuevo').addEventListener('click', limpiarFormularioCompleto);
+
+    // Desde la pantalla de éxito, ir directo a clasificar y armar el presupuesto del informe recién guardado
+    document.getElementById('btnClasificarAhora').addEventListener('click', function() {
+      const idInforme = this.dataset.idInforme;
+      if (!idInforme) return;
+      document.getElementById('exito').style.display = 'none';
+      document.querySelector('.tab[data-tab="sindefinir"]').click();
+      setTimeout(() => abrirEditorPresupuesto_(idInforme), 50);
+    });
+  </script>
+</body>
+</html>
