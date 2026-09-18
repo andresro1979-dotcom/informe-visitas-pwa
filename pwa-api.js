@@ -28,29 +28,33 @@ async function obtenerApiGet_(accion) {
   return json;
 }
 
-// Refresca Historial/Clientes/Pendientes/Presupuestos contra la API y reemplaza la caché local.
-// Si no hay conexión (o la API no responde), se queda con lo último guardado sin romper nada.
+// Refresca Historial/Clientes/Pendientes/Presupuestos/Expedientes TE1 contra la API y reemplaza
+// la caché local. Si no hay conexión (o la API no responde), se queda con lo último guardado.
 async function refrescarDatosSiHayConexion_() {
   if (!navigator.onLine) { mostrarBannerOffline_(true); return; }
   try {
-    const [historial, clientes, pendientes, presupuestos] = await Promise.all([
+    const [historial, clientes, pendientes, presupuestos, expedientesTE1] = await Promise.all([
       obtenerApiGet_('historial'),
       obtenerApiGet_('clientes'),
       obtenerApiGet_('pendientesPresupuesto'),
-      obtenerApiGet_('presupuestosGenerados')
+      obtenerApiGet_('presupuestosGenerados'),
+      obtenerApiGet_('expedientesTE1')
     ]);
     HISTORIAL_INICIAL = historial;
     PENDIENTES_PRESUPUESTO = pendientes;
     PRESUPUESTOS_GENERADOS = presupuestos;
     CLIENTES_GUARDADOS = clientes;
+    EXPEDIENTES_TE1 = expedientesTE1;
     reconstruirIndicesClientes_();
     guardarCache_('historial', historial);
     guardarCache_('clientes', clientes);
     guardarCache_('pendientesPresupuesto', pendientes);
     guardarCache_('presupuestosGenerados', presupuestos);
+    guardarCache_('expedientesTE1', expedientesTE1);
     mostrarBannerOffline_(false);
     if (typeof cargarPresupuestosGenerados_ === 'function') cargarPresupuestosGenerados_();
     if (typeof cargarHistorialCombinado_ === 'function') cargarHistorialCombinado_();
+    if (typeof refrescarListaExpedientesTE1_ === 'function') refrescarListaExpedientesTE1_();
   } catch (e) {
     mostrarBannerOffline_(true);
   }
@@ -62,6 +66,9 @@ function mostrarBannerOffline_(mostrar) {
 }
 
 // ---------- Outbox offline (IndexedDB: las fotos+firma en base64 pueden pesar varios MB) ----------
+// Cada elemento: {clave, accion, data, creado, codigoLocalRef?}. "accion" es el nombre de la
+// acción del backend (guardarInforme, guardarExpedienteTE1, subirDocumentoTE1...) — así un solo
+// outbox sirve para cualquier tipo de guardado offline, no solo informes.
 const DB_NAME_ = 'informe_visita_offline';
 const STORE_OUTBOX_ = 'outbox';
 
@@ -77,17 +84,22 @@ function abrirDB_() {
   });
 }
 
-async function encolarInformeOffline_(data) {
+// codigoLocalRef: solo lo usan los documentos de un Expediente TE1 creado offline — referencia
+// la "clave" local del expediente del que dependen, porque su "codigo" real todavía no existe
+// (lo asigna el servidor recién al sincronizar). Se resuelve en resolverDependientesTE1_.
+async function encolarOffline_(accion, data, codigoLocalRef) {
   const db = await abrirDB_();
   const clave = 'local-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+  const item = { clave, accion, data, creado: Date.now() };
+  if (codigoLocalRef) item.codigoLocalRef = codigoLocalRef;
   await new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_OUTBOX_, 'readwrite');
-    tx.objectStore(STORE_OUTBOX_).put({ clave, data, creado: Date.now() });
+    tx.objectStore(STORE_OUTBOX_).put(item);
     tx.oncomplete = resolve;
     tx.onerror = () => reject(tx.error);
   });
   actualizarBadgeSync_();
-  return { ok: true, id: clave, pdfUrl: '', pendienteSync: true };
+  return { ok: true, id: clave, clave: clave, pdfUrl: '', pendienteSync: true, accion: accion };
 }
 
 async function listarOutbox_() {
@@ -109,13 +121,40 @@ async function quitarDeOutbox_(clave) {
   });
 }
 
+async function actualizarItemOutbox_(clave, cambios) {
+  const db = await abrirDB_();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_OUTBOX_, 'readwrite');
+    const store = tx.objectStore(STORE_OUTBOX_);
+    const req = store.get(clave);
+    req.onsuccess = () => {
+      const item = req.result;
+      if (item) { Object.assign(item, cambios); store.put(item); }
+    };
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// Cuando un Expediente TE1 encolado offline termina de sincronizarse y recibe su "codigo" real,
+// hay que avisarle a cualquier documento que haya quedado en la cola apuntando a su clave local.
+async function resolverDependientesTE1_(claveExpedienteLocal, codigoReal) {
+  const pendientes = await listarOutbox_();
+  for (const item of pendientes) {
+    if (item.codigoLocalRef === claveExpedienteLocal) {
+      const nuevaData = Object.assign({}, item.data, { codigo: codigoReal });
+      await actualizarItemOutbox_(item.clave, { data: nuevaData, codigoLocalRef: null });
+    }
+  }
+}
+
 async function actualizarBadgeSync_() {
   const pendientes = await listarOutbox_().catch(() => []);
   const banner = document.getElementById('banner-sync');
   const texto = document.getElementById('banner-sync-texto');
   if (!banner || !texto) return;
   if (pendientes.length > 0) {
-    texto.textContent = '🔄 ' + pendientes.length + ' informe(s) pendiente(s) de enviar — toca para sincronizar';
+    texto.textContent = '🔄 ' + pendientes.length + ' pendiente(s) de enviar — toca para sincronizar';
     banner.style.display = 'block';
   } else {
     banner.style.display = 'none';
@@ -129,13 +168,17 @@ async function intentarSincronizar_() {
   try {
     const pendientes = await listarOutbox_();
     for (const item of pendientes) {
+      if (item.codigoLocalRef) break; // dependencia (expediente) todavía sin sincronizar: cortar y reintentar después
       try {
-        const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ accion: 'guardarInforme', token: API_TOKEN, args: [item.data] }) });
+        const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ accion: item.accion, token: API_TOKEN, args: [item.data] }) });
         const resultado = await resp.json();
         if (resultado.ok) {
+          if (item.accion === 'guardarExpedienteTE1' && resultado.codigo) {
+            await resolverDependientesTE1_(item.clave, resultado.codigo);
+          }
           await quitarDeOutbox_(item.clave);
         } else {
-          console.error('No se pudo sincronizar un informe:', resultado.error);
+          console.error('No se pudo sincronizar un elemento pendiente:', resultado.error);
           break; // error de datos: no seguir insistiendo con los demás en este ciclo
         }
       } catch (e) {
@@ -151,9 +194,12 @@ async function intentarSincronizar_() {
 
 // ---------- Llamadas de escritura (reemplaza a google.script.run) ----------
 // Con conexión: POST al backend (texto plano, sin header Content-Type, para no disparar
-// preflight CORS que Apps Script no responde). Sin conexión: "guardarInforme" se encola en el
-// outbox; cualquier otra acción (presupuestos) exige conexión, nada se pierde si falla.
-async function llamarApi(accion, args) {
+// preflight CORS que Apps Script no responde). Sin conexión: las acciones de la lista de abajo
+// se encolan en el outbox; cualquier otra acción exige conexión, nada se pierde si falla.
+const ACCIONES_ENCOLABLES_OFFLINE_ = ['guardarInforme', 'guardarExpedienteTE1', 'subirDocumentoTE1'];
+
+async function llamarApi(accion, args, opciones) {
+  opciones = opciones || {};
   try {
     if (!navigator.onLine) throw new Error('offline');
     const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ accion, token: API_TOKEN, args }) });
@@ -162,7 +208,7 @@ async function llamarApi(accion, args) {
     if (json && json.ok === false) throw new Error(json.error || 'Error desconocido');
     return json;
   } catch (err) {
-    if (accion === 'guardarInforme') return encolarInformeOffline_(args[0]);
+    if (ACCIONES_ENCOLABLES_OFFLINE_.includes(accion)) return encolarOffline_(accion, args[0], opciones.codigoLocalRef);
     throw new Error('Esta acción requiere conexión a internet.');
   }
 }

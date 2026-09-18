@@ -370,6 +370,7 @@
     <div class="tab" data-tab="sindefinir">Sin Definir</div>
     <div class="tab" data-tab="presupuestos">Presupuestos</div>
     <div class="tab" data-tab="historial">Historial</div>
+    <div class="tab" data-tab="te1">Expediente TE1</div>
   </div>
 
   <div class="contenedor">
@@ -959,6 +960,9 @@
     <!-- Compartido entre Historial, Sin Definir y Presupuestos: editor de ítems al enviar un informe a presupuesto -->
     <div id="editor-presupuesto-activo" style="display:none; margin-top:14px;"></div>
 
+    <!-- ================= EXPEDIENTE TE1 (ver te1.js) ================= -->
+    <div id="te1-contenedor" style="display:none;"></div>
+
   </div>
 
   <!-- ================= OVERLAY DE CARGA ================= -->
@@ -978,6 +982,7 @@
   </div>
 
   <script src="pwa-api.js"></script>
+  <script src="te1.js"></script>
   <script>
     // ---------- Datos iniciales: en la app de oficina venían incrustados por GAS al cargar
     // la página; acá (PWA aparte) se cargan de la última copia guardada en el celular y se
@@ -986,6 +991,7 @@
     let PENDIENTES_PRESUPUESTO = leerCache_('pendientesPresupuesto', []);
     let PRESUPUESTOS_GENERADOS = leerCache_('presupuestosGenerados', []);
     let CLIENTES_GUARDADOS = leerCache_('clientes', []);
+    let EXPEDIENTES_TE1 = leerCache_('expedientesTE1', []);
     let CLIENTES_POR_NOMBRE = {};
     let clientesOrdenados = [];
 
@@ -1311,6 +1317,7 @@
         document.getElementById('historial-lista').style.display = destino === 'historial' ? 'block' : 'none';
         document.getElementById('sindefinir-lista').style.display = destino === 'sindefinir' ? 'block' : 'none';
         document.getElementById('presupuestos-lista').style.display = destino === 'presupuestos' ? 'block' : 'none';
+        document.getElementById('te1-contenedor').style.display = destino === 'te1' ? 'block' : 'none';
         document.getElementById('editor-presupuesto-activo').style.display = 'none';
         document.getElementById('editor-presupuesto-activo').dataset.idActivo = '';
         if (destino === 'historial') {
@@ -1322,6 +1329,9 @@
         if (destino === 'presupuestos') {
           cargarPresupuestos_();
           cargarPresupuestosGenerados_();
+        }
+        if (destino === 'te1') {
+          mostrarTE1_();
         }
       });
     });

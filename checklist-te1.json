@@ -1,0 +1,28 @@
+{
+  "Monofásica": [
+    { "id": "pat-01", "categoria": "Puesta a Tierra", "item": "Sistema de puesta a tierra (TT) verificado y con continuidad", "obligatorio": true },
+    { "id": "pat-02", "categoria": "Puesta a Tierra", "item": "Barra/electrodo de tierra accesible y en buen estado", "obligatorio": true },
+    { "id": "prot-01", "categoria": "Protecciones", "item": "Diferencial general 30mA instalado y probado (botón de test)", "obligatorio": true },
+    { "id": "prot-02", "categoria": "Protecciones", "item": "Diferencial tipo A en circuitos con electrónica/variadores de frecuencia", "obligatorio": true },
+    { "id": "prot-03", "categoria": "Protecciones", "item": "Cada circuito tiene su propia protección (breaker) dimensionada a su conductor", "obligatorio": true },
+    { "id": "cond-01", "categoria": "Conductores", "item": "Secciones de conductor acordes a la carga de cada circuito", "obligatorio": true },
+    { "id": "cond-02", "categoria": "Conductores", "item": "Conductores sin empalmes fuera de cajas de registro", "obligatorio": false },
+    { "id": "tab-01", "categoria": "Tablero", "item": "Tablero eléctrico rotulado por circuito", "obligatorio": true },
+    { "id": "tab-02", "categoria": "Tablero", "item": "Tablero con tapa, sin partes energizadas expuestas", "obligatorio": true },
+    { "id": "emp-01", "categoria": "Empalme", "item": "Empalme y medidor en buen estado, acceso despejado", "obligatorio": true }
+  ],
+  "Trifásica": [
+    { "id": "pat-01", "categoria": "Puesta a Tierra", "item": "Sistema de puesta a tierra (TT) verificado y con continuidad", "obligatorio": true },
+    { "id": "pat-02", "categoria": "Puesta a Tierra", "item": "Barra/electrodo de tierra accesible y en buen estado", "obligatorio": true },
+    { "id": "prot-01", "categoria": "Protecciones", "item": "Diferencial general 30mA instalado y probado (botón de test)", "obligatorio": true },
+    { "id": "prot-02", "categoria": "Protecciones", "item": "Diferencial tipo A en circuitos con electrónica/variadores de frecuencia", "obligatorio": true },
+    { "id": "prot-03", "categoria": "Protecciones", "item": "Cada circuito tiene su propia protección (breaker) dimensionada a su conductor", "obligatorio": true },
+    { "id": "fas-01", "categoria": "Balance de Fases", "item": "Cargas distribuidas equilibradamente entre las 3 fases", "obligatorio": true },
+    { "id": "fas-02", "categoria": "Balance de Fases", "item": "Secuencia de fases correcta (verificada con fasímetro)", "obligatorio": true },
+    { "id": "cond-01", "categoria": "Conductores", "item": "Secciones de conductor acordes a la carga de cada circuito", "obligatorio": true },
+    { "id": "cond-02", "categoria": "Conductores", "item": "Conductores sin empalmes fuera de cajas de registro", "obligatorio": false },
+    { "id": "tab-01", "categoria": "Tablero", "item": "Tablero eléctrico rotulado por circuito", "obligatorio": true },
+    { "id": "tab-02", "categoria": "Tablero", "item": "Tablero con tapa, sin partes energizadas expuestas", "obligatorio": true },
+    { "id": "emp-01", "categoria": "Empalme", "item": "Empalme y medidor en buen estado, acceso despejado", "obligatorio": true }
+  ]
+}
