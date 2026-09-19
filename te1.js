@@ -138,12 +138,28 @@ function refrescarListaExpedientesTE1_() {
             <td>${e.TipoTramite || ''}</td>
             <td>${e.Cliente || ''}</td>
             <td>${e.Estado || ''}</td>
-            <td>${e.Estado !== 'Finalizado' ? `<button type="button" class="btn-fila btn-continuar-te1" data-codigo="${e.Codigo}">Continuar</button>` : ''}</td>
+            <td>${e.Estado !== 'Finalizado' ? `<button type="button" class="btn-fila btn-continuar-te1" data-codigo="${e.Codigo}">Continuar</button> <button type="button" class="btn-fila btn-eliminar-fila btn-eliminar-te1" data-codigo="${e.Codigo}">Eliminar</button>` : ''}</td>
           </tr>
         `).join('')}
       </tbody>
     </table>
   `;
+  cont.querySelectorAll('.btn-eliminar-te1').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('¿Eliminar el expediente ' + btn.dataset.codigo + '? Se borra de la hoja y sus documentos subidos van a la papelera. No se puede deshacer.')) return;
+      btn.disabled = true;
+      try {
+        const resp = await llamarApi('eliminarExpedienteSEC', [btn.dataset.codigo]);
+        if (!resp.ok) throw new Error(resp.error || 'Error desconocido');
+        EXPEDIENTES_TE1 = EXPEDIENTES_TE1.filter(e => e.Codigo !== btn.dataset.codigo);
+        guardarCache_('expedientesTE1', EXPEDIENTES_TE1);
+        refrescarListaExpedientesTE1_();
+      } catch (err) {
+        btn.disabled = false;
+        alert('No se pudo eliminar: ' + err.message);
+      }
+    });
+  });
   cont.querySelectorAll('.btn-continuar-te1').forEach(btn => {
     btn.addEventListener('click', () => {
       const expediente = lista.find(e => e.Codigo === btn.dataset.codigo);
