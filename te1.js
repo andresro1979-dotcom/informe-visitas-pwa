@@ -20,7 +20,11 @@ let contadorCircuitos_ = 0;
 let contadorPostacion_ = 0;
 let contadorLuminarias_ = 0;
 
-const CATEGORIAS_DOC_TE1_ = ['Cédula Instalador', 'Contrato de Suministro', 'Foto Empalme', 'Foto Tablero', 'Plano', 'Memoria Explicativa', 'Otros'];
+// Cuaderno NCh Elec. 4/2003 publicado como página aparte (pensada para el celular): se abre desde
+// cada ítem del checklist para consultar la norma sin salir a buscarla.
+const URL_CUADERNO_NCH_ = 'https://claude.ai/code/artifact/a388dbeb-75a1-48bf-a983-71622b15ba1f';
+
+const CATEGORIAS_DOC_TE1_ =['Cédula Instalador', 'Contrato de Suministro', 'Foto Empalme', 'Foto Tablero', 'Plano', 'Memoria Explicativa', 'Otros'];
 const CATEGORIAS_DOC_TE2_ = ['Detalle de Instalaciones (marca/modelo lámpara)', 'Plano del Proyecto (DWG)', 'Permiso Municipal de Edificación', 'Memoria Explicativa', 'Memoria de Cálculo de Puesta a Tierra', 'Memoria de Cálculo de Alumbrado Público (Vías)', 'Otros'];
 
 async function cargarChecklistTE1_() {
@@ -354,7 +358,7 @@ function renderCuerpoTE1_() {
   document.querySelectorAll('input[name="te1-tipo-suministro"]').forEach(radio => {
     radio.addEventListener('change', () => {
       expedienteActual_.tipoSuministro = radio.value;
-      expedienteActual_.checklist = (checklistTE1Base_[radio.value] || []).map(it => Object.assign({ estado: '', observacion: '', duda: '' }, it));
+      expedienteActual_.checklist = (checklistTE1Base_[radio.value] || []).map(it => Object.assign({ estado: '', observacion: '' }, it));
       document.getElementById('te1-seccion-checklist').style.display = 'block';
       renderChecklistTE1_();
       guardarBorradorTE1_();
@@ -466,7 +470,7 @@ function renderCuerpoTE2_() {
 
   // El checklist TE2 es fijo (no depende de un sub-tipo, a diferencia del tipo de suministro en TE1).
   if (!expedienteActual_.checklist || !expedienteActual_.checklist.length) {
-    expedienteActual_.checklist = (checklistTE2Base_ || []).map(it => Object.assign({ estado: '', observacion: '', duda: '' }, it));
+    expedienteActual_.checklist = (checklistTE2Base_ || []).map(it => Object.assign({ estado: '', observacion: '' }, it));
   }
   renderChecklistTE1_();
 
@@ -587,7 +591,7 @@ function renderChecklistTE1_() {
   cont.innerHTML = Object.keys(categorias).map(cat => `
     <h4 style="margin:14px 0 6px;color:var(--azul-oscuro);">${cat}</h4>
     ${categorias[cat].map(it => `
-      <div class="te1-checklist-fila" data-idx="${it.idx}" style="border-bottom:1px solid var(--borde);padding:8px 0;${it.duda ? 'border-left:3px solid #ff7a1a;padding-left:8px;' : ''}">
+      <div class="te1-checklist-fila" data-idx="${it.idx}" style="border-bottom:1px solid var(--borde);padding:8px 0;">
         <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">
           <span style="flex:1;font-size:14px;">${it.item}${it.obligatorio ? ' <span style="color:#c0392b;">*</span>' : ''}</span>
           <select class="te1-checklist-estado" data-idx="${it.idx}" style="width:auto;">
@@ -598,8 +602,7 @@ function renderChecklistTE1_() {
           </select>
         </div>
         <input type="text" class="te1-checklist-obs" data-idx="${it.idx}" placeholder="Observación (opcional)" value="${it.observacion || ''}" style="margin-top:4px;">
-        <input type="text" class="te1-checklist-duda" data-idx="${it.idx}" placeholder="¿Alguna duda con este ítem? Escribe la consulta para revisarla después" value="${it.duda || ''}" style="margin-top:4px;${it.duda ? 'border-color:#ff7a1a;' : ''}">
-        ${it.respuesta ? `<p style="margin:4px 0 0;background:#e6f4ea;color:#1e7a34;padding:6px 10px;border-radius:6px;font-size:12.5px;"><strong>Respuesta de oficina:</strong> ${it.respuesta}</p>` : ''}
+        <a href="${URL_CUADERNO_NCH_}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:12.5px;color:var(--azul);">📖 Consultar en el Cuaderno NCh Elec.</a>
       </div>
     `).join('')}
   `).join('');
@@ -613,19 +616,6 @@ function renderChecklistTE1_() {
   cont.querySelectorAll('.te1-checklist-obs').forEach(inp => {
     inp.addEventListener('input', () => {
       expedienteActual_.checklist[Number(inp.dataset.idx)].observacion = inp.value;
-      guardarBorradorTE1_();
-    });
-  });
-  // "Duda / a consultar": queda guardada junto al ítem y resaltada, para que la oficina la vea
-  // reunida al revisar el expediente (ver "Dudas a consultar" en abrirDetalleTE1Oficina_, Index.html).
-  cont.querySelectorAll('.te1-checklist-duda').forEach(inp => {
-    inp.addEventListener('input', () => {
-      const idx = Number(inp.dataset.idx);
-      expedienteActual_.checklist[idx].duda = inp.value;
-      inp.closest('.te1-checklist-fila').style.cssText = inp.value
-        ? 'border-bottom:1px solid var(--borde);padding:8px 0;border-left:3px solid #ff7a1a;padding-left:8px;'
-        : 'border-bottom:1px solid var(--borde);padding:8px 0;';
-      inp.style.borderColor = inp.value ? '#ff7a1a' : '';
       guardarBorradorTE1_();
     });
   });
