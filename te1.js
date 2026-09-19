@@ -599,6 +599,7 @@ function renderChecklistTE1_() {
         </div>
         <input type="text" class="te1-checklist-obs" data-idx="${it.idx}" placeholder="Observación (opcional)" value="${it.observacion || ''}" style="margin-top:4px;">
         <input type="text" class="te1-checklist-duda" data-idx="${it.idx}" placeholder="¿Alguna duda con este ítem? Escribe la consulta para revisarla después" value="${it.duda || ''}" style="margin-top:4px;${it.duda ? 'border-color:#ff7a1a;' : ''}">
+        ${it.respuesta ? `<p style="margin:4px 0 0;background:#e6f4ea;color:#1e7a34;padding:6px 10px;border-radius:6px;font-size:12.5px;"><strong>Respuesta de oficina:</strong> ${it.respuesta}</p>` : ''}
       </div>
     `).join('')}
   `).join('');
