@@ -20,10 +20,6 @@ let contadorCircuitos_ = 0;
 let contadorPostacion_ = 0;
 let contadorLuminarias_ = 0;
 
-// Cuaderno NCh Elec. 4/2003 publicado como página aparte (pensada para el celular): se abre desde
-// cada ítem del checklist para consultar la norma sin salir a buscarla.
-const URL_CUADERNO_NCH_ = 'https://claude.ai/code/artifact/a388dbeb-75a1-48bf-a983-71622b15ba1f';
-
 const CATEGORIAS_DOC_TE1_ =['Cédula Instalador', 'Contrato de Suministro', 'Foto Empalme', 'Foto Tablero', 'Plano', 'Memoria Explicativa', 'Otros'];
 const CATEGORIAS_DOC_TE2_ = ['Detalle de Instalaciones (marca/modelo lámpara)', 'Plano del Proyecto (DWG)', 'Permiso Municipal de Edificación', 'Memoria Explicativa', 'Memoria de Cálculo de Puesta a Tierra', 'Memoria de Cálculo de Alumbrado Público (Vías)', 'Otros'];
 
@@ -98,6 +94,10 @@ function expedienteVacio_() {
 // ---------- Pantalla principal de la pestaña: lista + botón "Nuevo expediente" ----------
 function mostrarTE1_() {
   const cont = contenedorTE1_();
+  // Si ya hay un expediente abierto en pantalla (ej. el técnico fue un momento a la pestaña
+  // Cuaderno NCh a consultar algo), no se rehace la vista: se conserva lo que ya llenó.
+  const formAbierto = document.getElementById('te1-formulario');
+  if (formAbierto && formAbierto.children.length) return;
   const borrador = restaurarBorradorTE1_();
   cont.innerHTML = `
     <div class="seccion">
@@ -602,7 +602,6 @@ function renderChecklistTE1_() {
           </select>
         </div>
         <input type="text" class="te1-checklist-obs" data-idx="${it.idx}" placeholder="Observación (opcional)" value="${it.observacion || ''}" style="margin-top:4px;">
-        <a href="${URL_CUADERNO_NCH_}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:12.5px;color:var(--azul);">📖 Consultar en el Cuaderno NCh Elec.</a>
       </div>
     `).join('')}
   `).join('');

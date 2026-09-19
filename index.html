@@ -349,6 +349,26 @@
       white-space: nowrap;
     }
     .tabla-registros .btn-fila.btn-eliminar-fila { color: #c0392b; }
+    /* ---------- Cuaderno NCh Elec. (pestaña de referencia buscable) ---------- */
+    .cuaderno-tema { scroll-margin-top: 130px; }
+    .cuaderno-tema.cuaderno-oculto { display: none; }
+    .cuaderno-eyebrow {
+      display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
+      color: var(--naranja); background: #fff3cd; border-radius: 5px; padding: 2px 8px; margin-bottom: 8px;
+    }
+    .cuaderno-mono { font-family: 'Courier New', monospace; }
+    .cuaderno-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0 16px; }
+    @media (max-width: 640px) { .cuaderno-grid-2 { grid-template-columns: 1fr; } }
+    .cuaderno-mini-card { background: var(--gris); border-radius: 8px; padding: 12px 14px; }
+    .cuaderno-mini-card h4 { margin: 0 0 4px; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--azul-marino); }
+    .cuaderno-mini-card p { margin: 0; font-size: 13px; color: #666; }
+    .cuaderno-callout {
+      border-left: 3px solid var(--naranja); background: #fff3cd; color: #664d03;
+      border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 13px; margin: 14px 0;
+    }
+    .cuaderno-callout strong { display: block; margin-bottom: 3px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.04em; }
+    .cuaderno-callout-ok { border-left-color: #34a853; background: #e6f4ea; color: #1e7a34; }
+    #cuaderno-nch-lista mark { background: #ffe58a; color: #3a2c00; border-radius: 3px; padding: 0 2px; }
   </style>
 </head>
 <body>
@@ -371,6 +391,7 @@
     <div class="tab" data-tab="presupuestos">Presupuestos</div>
     <div class="tab" data-tab="historial">Historial</div>
     <div class="tab" data-tab="te1">Expediente SEC</div>
+    <div class="tab" data-tab="cuaderno-nch">Cuaderno NCh</div>
   </div>
 
   <div class="contenedor">
@@ -963,6 +984,255 @@
     <!-- ================= EXPEDIENTE TE1 (ver te1.js) ================= -->
     <div id="te1-contenedor" style="display:none;"></div>
 
+    <!-- ================= CUADERNO NCH ELEC. 4/2003 (referencia buscable) ================= -->
+    <div id="cuaderno-nch-lista" style="display:none;">
+      <div class="seccion" style="position:sticky; top:46px; z-index:5;">
+        <input type="search" id="cuaderno-buscar" placeholder="Buscar un tema, un valor, una palabra… (ej: '30 mA', 'sección 16', 'resistencia')" autocomplete="off" style="margin-bottom:10px;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap; overflow-x:auto;">
+          <a href="#cuaderno-tableros" class="btn-fila">6 · Tableros</a>
+          <a href="#cuaderno-conductores" class="btn-fila">8.1 · Conductores</a>
+          <a href="#cuaderno-canalizaciones" class="btn-fila">8.2 · Canalizaciones</a>
+          <a href="#cuaderno-protecciones" class="btn-fila">9.2 · Protecciones</a>
+          <a href="#cuaderno-tierra" class="btn-fila">10 · Puesta a Tierra</a>
+          <a href="#cuaderno-mediciones" class="btn-fila">Apéndice 7 · Mediciones</a>
+          <a href="#cuaderno-dudas" class="btn-fila">Dudas frecuentes</a>
+        </div>
+      </div>
+
+      <div class="seccion cuaderno-tema" id="cuaderno-tableros" data-kw="tableros gabinete armario ip grado proteccion 200 amperes circuitos distribucion general">
+        <span class="cuaderno-eyebrow">Sección 6</span>
+        <h3 style="margin:0 0 4px;">Tableros</h3>
+        <p style="color:#666;font-size:13px;margin:0 0 14px;">Págs. 19–25 del documento oficial</p>
+
+        <h4>Tipos</h4>
+        <ul>
+          <li><strong>General:</strong> obligatorio si hay más de un tablero de distribución a más de 10&nbsp;m del empalme.</li>
+          <li><strong>General auxiliar:</strong> deriva desde un alimentador para energizar varios tableros de distribución.</li>
+          <li><strong>De distribución:</strong> protege y opera directamente los circuitos de la instalación.</li>
+        </ul>
+
+        <h4>Construcción y montaje</h4>
+        <ul>
+          <li>Grado de protección mínimo sugerido: <span class="cuaderno-mono">IP41</span> en interior, <span class="cuaderno-mono">IP44</span> en exterior. No se acepta <span class="cuaderno-mono">IP00</span> (tablero abierto).</li>
+          <li>Altura de montaje de los mandos: entre <span class="cuaderno-mono">0,60&nbsp;m</span> y <span class="cuaderno-mono">2,0&nbsp;m</span> del piso terminado.</li>
+          <li>Dejar <span class="cuaderno-mono">25%</span> de espacio libre para ampliaciones futuras.</li>
+          <li>Cubierta cubre-equipos + puerta exterior con chapa — se exime solo a tableros domésticos de hasta 4 circuitos.</li>
+          <li>Toda instalación con capacidad ≥ <span class="cuaderno-mono">200&nbsp;A</span> necesita instrumentos de medida (tensión y corriente por fase).</li>
+          <li>Barra o puente de conexión a tierra obligatorio en todo tablero (ver sección 10).</li>
+          <li>Máximo <span class="cuaderno-mono">42</span> dispositivos de protección (sin contar generales) en un tablero de distribución de alumbrado; bipolar cuenta como 2, tripolar como 3.</li>
+        </ul>
+      </div>
+
+      <div class="seccion cuaderno-tema" id="cuaderno-conductores" data-kw="conductores corriente admisible ampacidad tabla 8.7 seccion mm2 cobre pvc grupo 1 2 3">
+        <span class="cuaderno-eyebrow">Sección 8.1</span>
+        <h3 style="margin:0 0 4px;">Conductores y corriente admisible</h3>
+        <p style="color:#666;font-size:13px;margin:0 0 14px;">Tabla Nº 8.7 — cobre, aislación PVC, servicio 70°C, ambiente 30°C (pág. 37)</p>
+
+        <p>La misma sección de conductor admite distinta corriente según cómo esté instalada. La norma la separa en tres grupos — y es exactamente el mismo criterio que usa la validación del checklist TE1 en la PWA, según la canalización que se elija ahí.</p>
+
+        <div class="cuaderno-grid-2">
+          <div class="cuaderno-mini-card"><h4>Grupo 1</h4><p>Conductores monopolares en tuberías (PVC, conduit, ducto, canaleta).</p></div>
+          <div class="cuaderno-mini-card"><h4>Grupo 2</h4><p>Multipolares con cubierta común — cables planos, bandeja, móviles/portátiles.</p></div>
+          <div class="cuaderno-mini-card"><h4>Grupo 3</h4><p>Monopolares tendidos libremente al aire, separados al menos un diámetro entre sí.</p></div>
+          <div class="cuaderno-mini-card"><h4>No cubierto acá</h4><p>Directamente enterrado usa otra tabla — la app no valida ese caso.</p></div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="tabla-registros">
+            <caption style="text-align:left;font-size:12px;color:#888;padding:6px 0;">Corriente admisible [A] por sección nominal [mm²]</caption>
+            <thead><tr><th>Sección</th><th>Grupo 1</th><th>Grupo 2</th><th>Grupo 3</th></tr></thead>
+            <tbody>
+              <tr><td>0,75</td><td>—</td><td>12</td><td>15</td></tr>
+              <tr><td>1</td><td>11</td><td>15</td><td>19</td></tr>
+              <tr><td>1,5</td><td>15</td><td>19</td><td>23</td></tr>
+              <tr><td>2,5</td><td>20</td><td>25</td><td>32</td></tr>
+              <tr><td>4</td><td>25</td><td>34</td><td>42</td></tr>
+              <tr><td>6</td><td>33</td><td>44</td><td>54</td></tr>
+              <tr><td>10</td><td>45</td><td>61</td><td>73</td></tr>
+              <tr><td>16</td><td>61</td><td>82</td><td>98</td></tr>
+              <tr><td>25</td><td>83</td><td>108</td><td>129</td></tr>
+              <tr><td>35</td><td>103</td><td>134</td><td>158</td></tr>
+              <tr><td>50</td><td>132</td><td>167</td><td>197</td></tr>
+              <tr><td>70</td><td>164</td><td>207</td><td>244</td></tr>
+              <tr><td>95</td><td>197</td><td>249</td><td>291</td></tr>
+              <tr><td>120</td><td>235</td><td>291</td><td>343</td></tr>
+              <tr><td>150</td><td>—</td><td>327</td><td>382</td></tr>
+              <tr><td>185</td><td>—</td><td>374</td><td>436</td></tr>
+              <tr><td>240</td><td>—</td><td>442</td><td>516</td></tr>
+              <tr><td>300</td><td>—</td><td>510</td><td>595</td></tr>
+              <tr><td>400</td><td>—</td><td>—</td><td>708</td></tr>
+              <tr><td>500</td><td>—</td><td>—</td><td>809</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="cuaderno-callout">
+          <strong>Ojo con los factores de corrección</strong>
+          Estos valores son para 3 conductores activos como máximo y 30°C ambiente. Si hay más de 3 conductores en la misma canalización (tabla 8.8, factor fn de 0,5 a 0,8) o la temperatura ambiente es distinta (tabla 8.9), la corriente real de servicio es menor — multiplica por esos factores antes de dar algo por bueno.
+        </div>
+
+        <h4>Sección del conductor de protección (tierra)</h4>
+        <p style="font-size:13px;">Tabla Nº 10.23 — se fija según la sección del conductor activo del mismo circuito, no es un valor fijo único:</p>
+        <div style="overflow-x:auto;">
+          <table class="tabla-registros">
+            <thead><tr><th>Activo [mm²]</th><th>Protección [mm²]</th></tr></thead>
+            <tbody>
+              <tr><td>1,5</td><td>1,5</td></tr>
+              <tr><td>2,5</td><td>2,5</td></tr>
+              <tr><td>4</td><td>2,5</td></tr>
+              <tr><td>6</td><td>4</td></tr>
+              <tr><td>10 – 16</td><td>6</td></tr>
+              <tr><td>25 – 35</td><td>10</td></tr>
+              <tr><td>50 – 70</td><td>16</td></tr>
+              <tr><td>95 – 185</td><td>25</td></tr>
+              <tr><td>240 – 300</td><td>35</td></tr>
+              <tr><td>400 o más</td><td>50</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="seccion cuaderno-tema" id="cuaderno-canalizaciones" data-kw="canalizaciones tuberia pvc metalica conduit bandeja ducto canaleta enterrado tipos">
+        <span class="cuaderno-eyebrow">Sección 8.2</span>
+        <h3 style="margin:0 0 4px;">Sistemas de canalización</h3>
+        <p style="color:#666;font-size:13px;margin:0 0 14px;">Los tipos que aparecen en el selector de la PWA</p>
+        <p>Cada tipo trae sus propias exigencias de montaje (radios de curvatura, cantidad máxima de conductores, profundidad si va enterrada, etc.). Lo que sí es transversal es a qué <strong>grupo</strong> de la tabla de corriente admisible corresponde cada uno:</p>
+        <div class="cuaderno-grid-2">
+          <div class="cuaderno-mini-card"><h4>Grupo 1 (tubería)</h4><p>Tubería PVC empotrada o a la vista, tubería metálica (conduit) empotrada o a la vista, ducto, canaleta.</p></div>
+          <div class="cuaderno-mini-card"><h4>Grupo 2 (multipolar)</h4><p>Bandeja portacable.</p></div>
+          <div class="cuaderno-mini-card"><h4>Grupo 3 (al aire)</h4><p>Cable tendido al aire, con separación mínima de un diámetro.</p></div>
+          <div class="cuaderno-mini-card"><h4>Sin tabla acá</h4><p>Directamente enterrado — requiere la tabla de instalación subterránea, no incluida en este resumen.</p></div>
+        </div>
+      </div>
+
+      <div class="seccion cuaderno-tema" id="cuaderno-protecciones" data-kw="protecciones diferencial contactos indirectos sensibilidad 30 ma 10 ma 5 ma clase a clase b">
+        <span class="cuaderno-eyebrow">Sección 9.2</span>
+        <h3 style="margin:0 0 4px;">Protección contra contactos indirectos</h3>
+        <p style="color:#666;font-size:13px;margin:0 0 14px;">Diferenciales — págs. 73–77</p>
+
+        <p>La norma no fija "30&nbsp;mA en todas partes": distingue dos familias de protección y varias sensibilidades según el riesgo del recinto.</p>
+
+        <h4>Clase A — evitar que el contacto sea peligroso</h4>
+        <p>Transformadores de aislación, tensiones extra bajas (24&nbsp;V / 42&nbsp;V), doble aislación, conexiones equipotenciales. Se usan en casos puntuales, no como regla general de un circuito doméstico.</p>
+
+        <h4>Clase B — cortar la falla automáticamente</h4>
+        <p>Puesta a tierra de protección + corte automático, neutralización, o protector diferencial. Es la familia que se usa en la gran mayoría de las instalaciones de consumo.</p>
+
+        <h4>Sensibilidades según el recinto</h4>
+        <div style="overflow-x:auto;">
+          <table class="tabla-registros">
+            <thead><tr><th>Situación</th><th>Sensibilidad</th></tr></thead>
+            <tbody>
+              <tr><td>Circuitos de enchufes en locales comerciales, oficinas y educacionales</td><td>Diferencial exigido</td></tr>
+              <tr><td>Recintos mojados (baños públicos y similares)</td><td>≥ 10&nbsp;mA</td></tr>
+              <tr><td>Recintos húmedos</td><td>hasta 30&nbsp;mA</td></tr>
+              <tr><td>Iluminación de piscinas / espejos de agua sin 24V</td><td>≤ 5&nbsp;mA</td></tr>
+              <tr><td>Uso doméstico general (práctica habitual, no siempre literal en la norma)</td><td>30&nbsp;mA</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="cuaderno-callout">
+          <strong>Cómo se relaciona con la puesta a tierra</strong>
+          La resistencia de la puesta a tierra asociada a un diferencial debe cumplir R = Vs / Is (Vs = tensión de seguridad, Is = sensibilidad del diferencial en A). A menor sensibilidad, más exigente la resistencia de tierra que se necesita.
+        </div>
+      </div>
+
+      <div class="seccion cuaderno-tema" id="cuaderno-tierra" data-kw="puesta a tierra servicio proteccion electrodo resistencia neutro seccion conductor">
+        <span class="cuaderno-eyebrow">Sección 10</span>
+        <h3 style="margin:0 0 4px;">Puestas a tierra</h3>
+        <p style="color:#666;font-size:13px;margin:0 0 14px;">Págs. 78–83</p>
+
+        <div class="cuaderno-grid-2">
+          <div class="cuaderno-mini-card"><h4>Tierra de servicio</h4><p>Neutro del empalme puesto a tierra, lo más cerca posible de la acometida. Aislación blanca (código de colores 8.0.4.15). Sección mínima 21&nbsp;mm² en cobre.</p></div>
+          <div class="cuaderno-mini-card"><h4>Tierra de protección</h4><p>Une las carcazas metálicas para evitar tensión de contacto peligrosa. Resistencia máxima según fórmula, no un número fijo.</p></div>
+        </div>
+
+        <h4>Sección del conductor de tierra de servicio</h4>
+        <p style="font-size:13px;">Tabla Nº 10.21 — depende de la sección de la acometida:</p>
+        <div style="overflow-x:auto;">
+          <table class="tabla-registros">
+            <thead><tr><th>Acometida [mm²]</th><th>Tierra de servicio [mm²]</th></tr></thead>
+            <tbody>
+              <tr><td>hasta 6</td><td>4</td></tr>
+              <tr><td>10 – 25</td><td>10</td></tr>
+              <tr><td>35 – 70</td><td>16</td></tr>
+              <tr><td>95 – 120</td><td>35</td></tr>
+              <tr><td>150 – 240</td><td>50</td></tr>
+              <tr><td>300 – 400</td><td>70</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Electrodos</h4>
+        <ul>
+          <li>Se acepta usar las barras de las fundaciones de hormigón armado como electrodo, si suman ≥ 15&nbsp;m de longitud, ≥ 0,75&nbsp;m de profundidad y ≥ 10&nbsp;mm de diámetro.</li>
+          <li>Conductor de cobre desnudo como electrodo: mínimo 16&nbsp;mm² y 20&nbsp;m de largo, cubierto por al menos 5&nbsp;cm de hormigón.</li>
+          <li>La resistencia de un electrodo depende de la resistividad del terreno (tabla 10.24, referencia a 100&nbsp;Ω·m) — no hay un valor único aceptable para cualquier suelo.</li>
+        </ul>
+
+        <div class="cuaderno-callout cuaderno-callout-ok">
+          <strong>Solo una OIIE certifica</strong>
+          La medición formal de resistencia de puesta a tierra que va al Certificado de Conformidad solo la puede hacer una OIIE autorizada. Lo que se registra en terreno con el checklist TE1 es una verificación preliminar, no el certificado.
+        </div>
+      </div>
+
+      <div class="seccion cuaderno-tema" id="cuaderno-mediciones" data-kw="mediciones protocolo aislacion megohmetro resistencia tierra resistividad geohmetro wenner schlumberger">
+        <span class="cuaderno-eyebrow">Apéndice 7</span>
+        <h3 style="margin:0 0 4px;">Protocolos de medición</h3>
+        <p style="color:#666;font-size:13px;margin:0 0 14px;">Págs. 133–137</p>
+
+        <h4>Aislación</h4>
+        <ul>
+          <li>Instrumento: megóhmetro, 500&nbsp;V mínimo (es común usar 1000&nbsp;V).</li>
+          <li>Un minuto de tensión aplicada entre cada fase/neutro y tierra, y entre conductores de dos en dos.</li>
+          <li>Referencia práctica sugerida para 380&nbsp;V: ≥ 10&nbsp;MΩ. A 550&nbsp;V: ≥ 15&nbsp;MΩ. A 660&nbsp;V: ≥ 25&nbsp;MΩ.</li>
+        </ul>
+
+        <h4>Resistencia de puesta a tierra</h4>
+        <ul>
+          <li>Instrumento: geóhmetro de 3 o 4 electrodos.</li>
+          <li>Configuración habitual: Wenner o Schlumberger, con la tierra de referencia bien alejada de la puesta a tierra que se mide (3 a 6 veces su alcance vertical).</li>
+          <li>Espaciamiento recomendado de la sonda al medir: 5&nbsp;m en instalaciones de consumo.</li>
+          <li>El resultado se compara contra el valor calculado en el proyecto, no contra un número universal.</li>
+        </ul>
+      </div>
+
+      <div class="seccion cuaderno-tema" id="cuaderno-dudas" data-kw="dudas consultas mitos errores comunes confusion 20 metros">
+        <span class="cuaderno-eyebrow">Zona gris</span>
+        <h3 style="margin:0 0 4px;">Dudas frecuentes</h3>
+        <p style="color:#666;font-size:13px;margin:0 0 14px;">Puntos que la propia norma marca como confusos en la práctica</p>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="background:var(--gris);border-radius:8px;padding:12px 14px;font-size:13.5px;">
+            <div style="font-weight:600;margin-bottom:4px;">"Hay que separar las tierras de servicio y protección por 20&nbsp;m"</div>
+            <div style="color:#666;">La norma dice explícitamente que esto es un mito extendido: los 20&nbsp;m solo aplican al caso puntual de un electrodo de barra de 3&nbsp;m enterrado verticalmente. La separación real hay que calcularla según el terreno y la instalación, no asumir un número fijo.</div>
+          </div>
+          <div style="background:var(--gris);border-radius:8px;padding:12px 14px;font-size:13.5px;">
+            <div style="font-weight:600;margin-bottom:4px;">"Tierra de protección" y "neutralización" son lo mismo</div>
+            <div style="color:#666;">Son sistemas distintos (secciones 9.2.7.1 y 9.2.7.4). El de tierra de protección pura queda muy limitado por la resistencia del circuito y se restringe a protecciones de baja capacidad (hasta 16&nbsp;A) en terrenos muy conductores — en la práctica chilena se ha confundido tradicionalmente con la neutralización, que es de uso mucho más amplio.</div>
+          </div>
+          <div style="background:var(--gris);border-radius:8px;padding:12px 14px;font-size:13.5px;">
+            <div style="font-weight:600;margin-bottom:4px;">"Menor sensibilidad = dispara más rápido / con menos corriente"</div>
+            <div style="color:#666;">Al revés: menor sensibilidad corresponde a mayor corriente de disparo. Un diferencial de 300&nbsp;mA es menos sensible que uno de 30&nbsp;mA.</div>
+          </div>
+          <div style="background:var(--gris);border-radius:8px;padding:12px 14px;font-size:13.5px;">
+            <div style="font-weight:600;margin-bottom:4px;">"El valor de la tabla de corriente admisible siempre aplica tal cual"</div>
+            <div style="color:#666;">Solo es válido hasta 3 conductores activos y 30°C ambiente. Con más conductores o más calor hay que aplicarle los factores de corrección (tablas 8.8 y 8.9) antes de comparar contra la corriente real del circuito.</div>
+          </div>
+        </div>
+      </div>
+
+      <p id="cuaderno-sin-resultados" style="display:none;text-align:center;color:#888;padding:30px 0;">Nada por acá — prueba con otra palabra.</p>
+
+      <p style="text-align:center;color:#888;font-size:12px;padding:0 0 20px;">
+        Resumen de referencia, no reemplaza la lectura completa de la norma. Fuente oficial:
+        <a href="https://www.sec.cl/sitioweb/electricidad_norma4/norma4_completa.pdf" target="_blank" rel="noopener">sec.cl — NCh Elec. 4/2003</a>, SEC, octubre de 2003.
+      </p>
+    </div>
+
+
+
   </div>
 
   <!-- ================= OVERLAY DE CARGA ================= -->
@@ -1318,6 +1588,7 @@
         document.getElementById('sindefinir-lista').style.display = destino === 'sindefinir' ? 'block' : 'none';
         document.getElementById('presupuestos-lista').style.display = destino === 'presupuestos' ? 'block' : 'none';
         document.getElementById('te1-contenedor').style.display = destino === 'te1' ? 'block' : 'none';
+        document.getElementById('cuaderno-nch-lista').style.display = destino === 'cuaderno-nch' ? 'block' : 'none';
         document.getElementById('editor-presupuesto-activo').style.display = 'none';
         document.getElementById('editor-presupuesto-activo').dataset.idActivo = '';
         if (destino === 'historial') {
@@ -2285,6 +2556,54 @@
       document.querySelector('.tab[data-tab="sindefinir"]').click();
       setTimeout(() => abrirEditorPresupuesto_(idInforme), 50);
     });
-  </script>
+
+    // ==================== CUADERNO NCH ELEC. 4/2003 (buscador) ====================
+    // Contenido estático (mismo resumen publicado aparte como página independiente para el
+    // celular); acá solo se filtra/resalta client-side, sin llamada al servidor.
+    (function () {
+      const input = document.getElementById('cuaderno-buscar');
+      if (!input) return;
+      const secciones = Array.prototype.slice.call(document.querySelectorAll('.cuaderno-tema'));
+      const sinResultados = document.getElementById('cuaderno-sin-resultados');
+
+      function limpiarMarcas(el) {
+        el.querySelectorAll('mark').forEach(m => {
+          const texto = document.createTextNode(m.textContent);
+          m.replaceWith(texto);
+        });
+      }
+
+      function resaltar(el, termino) {
+        if (!termino) return;
+        const regex = new RegExp('(' + termino.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+        const nodos = [];
+        let nodo;
+        while ((nodo = walker.nextNode())) {
+          if (nodo.nodeValue.match(regex) && nodo.parentElement.tagName !== 'MARK') nodos.push(nodo);
+        }
+        nodos.forEach(n => {
+          const span = document.createElement('span');
+          span.innerHTML = n.nodeValue.replace(regex, '<mark>$1</mark>');
+          n.replaceWith(span);
+        });
+      }
+
+      input.addEventListener('input', () => {
+        const termino = input.value.trim().toLowerCase();
+        let algunaVisible = false;
+        secciones.forEach(sec => {
+          limpiarMarcas(sec);
+          const texto = (sec.textContent + ' ' + (sec.dataset.kw || '')).toLowerCase();
+          const coincide = !termino || texto.indexOf(termino) !== -1;
+          sec.classList.toggle('cuaderno-oculto', !coincide);
+          if (coincide) {
+            algunaVisible = true;
+            if (termino) resaltar(sec, termino);
+          }
+        });
+        sinResultados.style.display = algunaVisible ? 'none' : 'block';
+      });
+    })();  </script>
 </body>
 </html>
