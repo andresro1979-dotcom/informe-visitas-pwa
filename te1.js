@@ -108,6 +108,7 @@ function mostrarTE1_() {
       ${borrador ? `<p style="background:#fff3cd;color:#664d03;padding:10px 14px;border-radius:8px;font-size:13px;">
         Tienes un expediente ${borrador.tipoTramite || 'SEC'} sin terminar de enviar (${borrador.codigo || 'sin código aún'} — ${borrador.cliente || 'sin cliente'}).
         <button type="button" id="btn-continuar-borrador-te1" style="margin-left:8px;">Continuar</button>
+        <button type="button" id="btn-descartar-borrador-te1" style="margin-left:6px;">Descartar</button>
       </p>` : ''}
       <div id="te1-lista-sincronizados"></div>
     </div>
@@ -116,6 +117,15 @@ function mostrarTE1_() {
   document.getElementById('btn-nuevo-te1').addEventListener('click', () => nuevoExpedienteTE1_());
   const btnContinuarBorrador = document.getElementById('btn-continuar-borrador-te1');
   if (btnContinuarBorrador) btnContinuarBorrador.addEventListener('click', () => abrirExpedienteTE1_(borrador));
+  const btnDescartarBorrador = document.getElementById('btn-descartar-borrador-te1');
+  if (btnDescartarBorrador) {
+    btnDescartarBorrador.addEventListener('click', () => {
+      if (!confirm('¿Descartar este borrador? Se borra lo que quedó sin enviar en este celular (si el expediente ya se había guardado, sigue en la lista de abajo).')) return;
+      borrarBorradorTE1_();
+      const aviso = btnDescartarBorrador.closest('p');
+      if (aviso) aviso.remove();
+    });
+  }
   refrescarListaExpedientesTE1_();
 }
 
@@ -865,7 +875,9 @@ async function guardarExpedienteTE1_() {
     }
     documentosPendientes_ = [];
     renderDocumentosPendientesTE1_();
-    guardarBorradorTE1_();
+    // Guardado en el servidor: ya no hay nada "sin enviar", no se vuelve a dejar borrador.
+    // Solo si quedó en cola offline se conserva el borrador.
+    if (resp.pendienteSync) guardarBorradorTE1_();
   } catch (err) {
     mensaje.textContent = 'Error: ' + err.message;
     mensaje.style.color = '#c0392b';
