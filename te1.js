@@ -158,13 +158,16 @@ function refrescarListaExpedientesTE1_() {
     btn.addEventListener('click', async () => {
       if (!confirm('¿Eliminar el expediente ' + btn.dataset.codigo + '? Se borra de la hoja y sus documentos subidos van a la papelera. No se puede deshacer.')) return;
       btn.disabled = true;
-      try {
-        const resp = await llamarApi('eliminarExpedienteSEC', [btn.dataset.codigo]);
-        if (!resp.ok) throw new Error(resp.error || 'Error desconocido');
+      const quitarDeLaLista = () => {
         EXPEDIENTES_TE1 = EXPEDIENTES_TE1.filter(e => e.Codigo !== btn.dataset.codigo);
         guardarCache_('expedientesTE1', EXPEDIENTES_TE1);
         refrescarListaExpedientesTE1_();
+      };
+      try {
+        await llamarApi('eliminarExpedienteSEC', [btn.dataset.codigo]);
+        quitarDeLaLista();
       } catch (err) {
+        if (/No se encontró el expediente/.test(err.message)) { quitarDeLaLista(); return; } // ya estaba borrado
         btn.disabled = false;
         alert('No se pudo eliminar: ' + err.message);
       }

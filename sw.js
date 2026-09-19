@@ -1,6 +1,6 @@
 // Subir esta versión cada vez que se agreguen/cambien archivos del app shell: si no se sube,
 // los celulares que ya instalaron la PWA siguen usando el Service Worker (y la caché) vieja.
-const CACHE_NAME = 'informe-visita-shell-v5';
+const CACHE_NAME = 'informe-visita-shell-v6';
 const ARCHIVOS_SHELL = [
   './',
   './index.html',

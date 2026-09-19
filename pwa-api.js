@@ -198,19 +198,26 @@ async function intentarSincronizar_() {
 // se encolan en el outbox; cualquier otra acción exige conexión, nada se pierde si falla.
 const ACCIONES_ENCOLABLES_OFFLINE_ = ['guardarInforme', 'guardarExpedienteSEC', 'subirDocumentoSEC'];
 
+// Solo un fallo de red (o una respuesta ilegible del servidor) cuenta como "sin conexión". Si el
+// servidor responde y rechaza la acción ({ok:false, error}), se muestra ESE error: antes cualquier
+// fallo se disfrazaba de "requiere conexión a internet" (y un guardado rechazado se encolaba).
 async function llamarApi(accion, args, opciones) {
   opciones = opciones || {};
+  const encolable = ACCIONES_ENCOLABLES_OFFLINE_.includes(accion);
+  let json;
   try {
     if (!navigator.onLine) throw new Error('offline');
     const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ accion, token: API_TOKEN, args }) });
     if (!resp.ok) throw new Error('Error del servidor (' + resp.status + ')');
-    const json = await resp.json();
-    if (json && json.ok === false) throw new Error(json.error || 'Error desconocido');
-    return json;
+    json = await resp.json();
   } catch (err) {
-    if (ACCIONES_ENCOLABLES_OFFLINE_.includes(accion)) return encolarOffline_(accion, args[0], opciones.codigoLocalRef);
-    throw new Error('Esta acción requiere conexión a internet.');
+    if (encolable) return encolarOffline_(accion, args[0], opciones.codigoLocalRef);
+    throw new Error(navigator.onLine
+      ? 'No se pudo comunicar con el servidor. Intenta de nuevo en un momento.'
+      : 'Esta acción requiere conexión a internet.');
   }
+  if (json && json.ok === false) throw new Error(json.error || 'Error desconocido');
+  return json;
 }
 
 window.addEventListener('online', () => { mostrarBannerOffline_(false); intentarSincronizar_(); refrescarDatosSiHayConexion_(); });
