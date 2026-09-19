@@ -63,11 +63,11 @@ function mostrarTE1_() {
   cont.innerHTML = `
     <div class="seccion">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h3 style="margin:0;">Expedientes TE1</h3>
+        <h3 style="margin:0;">Expedientes SEC</h3>
         <button type="button" class="btn-enviar" id="btn-nuevo-te1" style="width:auto; padding:8px 16px;">+ Nuevo</button>
       </div>
       ${borrador ? `<p style="background:#fff3cd;color:#664d03;padding:10px 14px;border-radius:8px;font-size:13px;">
-        Tienes un expediente TE1 sin terminar de enviar (${borrador.codigo || 'sin código aún'} — ${borrador.cliente || 'sin cliente'}).
+        Tienes un expediente SEC sin terminar de enviar (${borrador.codigo || 'sin código aún'} — ${borrador.cliente || 'sin cliente'}).
         <button type="button" id="btn-continuar-borrador-te1" style="margin-left:8px;">Continuar</button>
       </p>` : ''}
       <div id="te1-lista-sincronizados"></div>
@@ -169,7 +169,7 @@ function renderFormularioTE1_() {
 
   cont.innerHTML = `
     <div class="seccion">
-      <h3 style="margin-top:0;">${e.codigo ? 'Expediente ' + e.codigo : 'Nuevo Expediente TE1'}</h3>
+      <h3 style="margin-top:0;">${e.codigo ? 'Expediente ' + e.codigo : 'Nuevo Expediente SEC'}</h3>
       <label>Fecha</label>
       <input type="date" id="te1-fecha" value="${e.fecha || ''}">
       <label>Técnico</label>
