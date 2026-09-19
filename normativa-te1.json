@@ -1,0 +1,25 @@
+{
+  "nota": "Valores de referencia típicos (cobre, aislación PVC, 2 conductores cargados, canalización empotrada, temperatura ambiente 30°C), basados en tablas usuales de la NCh Elec. 4/2003. Son orientativos para avisar posibles problemas, NO un respaldo de cumplimiento normativo certificado: confirmar contra la edición vigente y las condiciones reales de instalación (agrupamiento de conductores, temperatura, método de instalación) antes de usarlos como sustento técnico formal. Editable sin tocar el código.",
+  "canalizaciones": [
+    "Tubería PVC empotrada",
+    "Tubería PVC a la vista",
+    "Tubería metálica (conduit) empotrada",
+    "Tubería metálica (conduit) a la vista",
+    "Bandeja portacable",
+    "Ducto",
+    "Canaleta",
+    "Directamente enterrado",
+    "Al aire (cable tendido)"
+  ],
+  "ampacidadCobrePVC": {
+    "1.5": 15,
+    "2.5": 20,
+    "4": 25,
+    "6": 34,
+    "10": 46,
+    "16": 61,
+    "25": 80,
+    "35": 99,
+    "50": 119
+  }
+}

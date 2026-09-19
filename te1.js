@@ -7,6 +7,7 @@
 // no desde acá.
 
 let checklistTE1Base_ = null; // { "Monofásica": [...], "Trifásica": [...] }, cargado una vez
+let normativaTE1_ = null; // { canalizaciones: [...], ampacidadCobrePVC: {...} }, ver normativa-te1.json
 let expedienteActual_ = null; // { codigo, claveLocal, tipoSuministro, checklist, circuitos, ... }
 let documentosPendientes_ = []; // [{categoria, nombreArchivo, base64}] agregados y aún no enviados
 let contadorCircuitos_ = 0;
@@ -20,6 +21,20 @@ async function cargarChecklistTE1_() {
     checklistTE1Base_ = { 'Monofásica': [], 'Trifásica': [] };
   }
   return checklistTE1Base_;
+}
+
+// Valores de referencia (editables en normativa-te1.json, ver "nota" ahí) para avisar posibles
+// problemas de dimensionamiento — no reemplazan el criterio del técnico ni son un respaldo
+// normativo certificado.
+async function cargarNormativaTE1_() {
+  if (normativaTE1_) return normativaTE1_;
+  try {
+    const resp = await fetch('normativa-te1.json');
+    normativaTE1_ = await resp.json();
+  } catch (e) {
+    normativaTE1_ = { canalizaciones: [], ampacidadCobrePVC: {} };
+  }
+  return normativaTE1_;
 }
 
 function contenedorTE1_() {
@@ -107,7 +122,7 @@ function refrescarListaExpedientesTE1_() {
 }
 
 async function nuevoExpedienteTE1_() {
-  await cargarChecklistTE1_();
+  await Promise.all([cargarChecklistTE1_(), cargarNormativaTE1_()]);
   expedienteActual_ = {
     codigo: '', claveLocal: '', fecha: new Date().toISOString().slice(0, 10), tecnico: '',
     cliente: '', direccion: '', telefono: '', contacto: '', correo: '',
@@ -118,7 +133,7 @@ async function nuevoExpedienteTE1_() {
 }
 
 async function abrirExpedienteTE1_(datos) {
-  await cargarChecklistTE1_();
+  await Promise.all([cargarChecklistTE1_(), cargarNormativaTE1_()]);
   expedienteActual_ = Object.assign({
     codigo: '', claveLocal: '', fecha: '', tecnico: '', cliente: '', direccion: '', telefono: '',
     contacto: '', correo: '', tipoSuministro: '', checklist: [], puntosPropuestos: [], circuitos: [], factorDemanda: 1
@@ -219,7 +234,7 @@ function renderFormularioTE1_() {
       <div style="overflow-x:auto;">
         <table class="tabla-registros" id="tabla-circuitos-te1">
           <thead><tr>
-            <th>N°</th><th>Descripción</th><th>Potencia (W)</th><th>Tensión (V)</th><th>Corriente (A)</th>
+            <th></th><th>N°</th><th>Descripción</th><th>Potencia (W)</th><th>Tensión (V)</th><th>Corriente (A)</th>
             <th>Conductor (mm²)</th><th>Longitud (m)</th><th>Protección</th><th>Diferencial</th><th>Canalización</th><th></th>
           </tr></thead>
           <tbody></tbody>
@@ -230,6 +245,8 @@ function renderFormularioTE1_() {
         <div><label>Factor de demanda</label><input type="number" step="0.05" min="0" id="te1-factor-demanda" value="${e.factorDemanda || 1}"></div>
         <div><label>Demanda Total</label><p id="te1-demanda-total" style="font-weight:600;font-size:16px;margin:8px 0;">0 W</p></div>
       </div>
+      <div id="te1-avisos-normativa"></div>
+      <p style="font-size:11px;color:#888;margin-top:6px;">Los avisos de corriente/protección son valores de referencia típicos (ver normativa-te1.json), no un respaldo normativo certificado — revisar siempre con criterio profesional.</p>
     </div>
 
     <button type="button" class="btn-enviar" id="btn-guardar-te1">Guardar Expediente</button>
@@ -377,17 +394,20 @@ function agregarFilaCircuitoTE1_(datosIniciales) {
   const tbody = document.querySelector('#tabla-circuitos-te1 tbody');
   const fila = document.createElement('tr');
   const d = datosIniciales || {};
+  const opcionesCanalizacion = (normativaTE1_ && normativaTE1_.canalizaciones || [])
+    .map(c => `<option value="${c}" ${d.canalizacion === c ? 'selected' : ''}>${c}</option>`).join('');
   fila.innerHTML = `
+    <td class="circuito-estado" style="text-align:center;" title="">✅</td>
     <td><input type="number" class="circuito-numero" value="${d.numero || contadorCircuitos_}" style="width:50px;"></td>
     <td><input type="text" class="circuito-descripcion" value="${d.descripcion || ''}" style="width:120px;"></td>
     <td><input type="number" class="circuito-potencia" value="${d.potenciaW || ''}" style="width:80px;"></td>
     <td><input type="number" class="circuito-tension" value="${d.tension || 220}" style="width:70px;"></td>
     <td class="circuito-corriente" style="text-align:right;">0</td>
-    <td><input type="text" class="circuito-seccion" value="${d.seccionMm2 || ''}" style="width:60px;"></td>
+    <td><input type="text" class="circuito-seccion" value="${d.seccionMm2 || ''}" style="width:60px;" placeholder="mm²"></td>
     <td><input type="number" class="circuito-longitud" value="${d.longitud || ''}" style="width:60px;"></td>
-    <td><input type="text" class="circuito-proteccion" value="${d.proteccion || ''}" style="width:70px;"></td>
+    <td><input type="text" class="circuito-proteccion" value="${d.proteccion || ''}" style="width:70px;" placeholder="A"></td>
     <td><input type="text" class="circuito-diferencial" value="${d.diferencial || ''}" style="width:70px;"></td>
-    <td><input type="text" class="circuito-canalizacion" value="${d.canalizacion || ''}" style="width:90px;"></td>
+    <td><select class="circuito-canalizacion" style="width:150px;"><option value="">Selecciona...</option>${opcionesCanalizacion}</select></td>
     <td><button type="button" class="btn-fila btn-eliminar-fila">×</button></td>
   `;
   const recalcularFila = () => {
@@ -395,10 +415,11 @@ function agregarFilaCircuitoTE1_(datosIniciales) {
     const tension = fila.querySelector('.circuito-tension').value;
     fila.querySelector('.circuito-corriente').textContent = calcularCorrienteCircuito_(potencia, tension, expedienteActual_.tipoSuministro);
     recalcularDemandaTotal_();
+    revalidarCircuitosTE1_();
     guardarBorradorTE1_();
   };
-  fila.querySelectorAll('input').forEach(inp => inp.addEventListener('input', recalcularFila));
-  fila.querySelector('.btn-eliminar-fila').addEventListener('click', () => { fila.remove(); recalcularDemandaTotal_(); guardarBorradorTE1_(); });
+  fila.querySelectorAll('input, select').forEach(el => el.addEventListener('input', recalcularFila));
+  fila.querySelector('.btn-eliminar-fila').addEventListener('click', () => { fila.remove(); recalcularDemandaTotal_(); revalidarCircuitosTE1_(); guardarBorradorTE1_(); });
   tbody.appendChild(fila);
   recalcularFila();
 }
@@ -416,6 +437,62 @@ function leerCircuitosTE1_() {
     diferencial: fila.querySelector('.circuito-diferencial').value,
     canalizacion: fila.querySelector('.circuito-canalizacion').value
   })).filter(c => c.descripcion || c.potenciaW);
+}
+
+// ---------- Validación orientativa contra la tabla de ampacidad (ver normativa-te1.json) ----------
+function buscarAmpacidad_(seccionTexto) {
+  const tabla = (normativaTE1_ && normativaTE1_.ampacidadCobrePVC) || {};
+  const seccion = parseFloat(String(seccionTexto || '').replace(',', '.'));
+  if (!seccion) return null;
+  // Match exacto primero; si no existe esa sección en la tabla, usa la más cercana hacia arriba.
+  const claveExacta = Object.keys(tabla).find(k => parseFloat(k) === seccion);
+  if (claveExacta) return tabla[claveExacta];
+  const secciones = Object.keys(tabla).map(parseFloat).sort((a, b) => a - b);
+  const masCercana = secciones.find(s => s >= seccion);
+  return masCercana ? tabla[masCercana] : null;
+}
+
+function validarCircuitoTE1_(fila) {
+  const avisos = [];
+  const corriente = parseFloat(fila.querySelector('.circuito-corriente').textContent) || 0;
+  const seccionTexto = fila.querySelector('.circuito-seccion').value;
+  const proteccion = parseFloat(String(fila.querySelector('.circuito-proteccion').value || '').replace(',', '.'));
+  const diferencial = fila.querySelector('.circuito-diferencial').value.trim();
+  const numero = fila.querySelector('.circuito-numero').value;
+  const ampacidad = buscarAmpacidad_(seccionTexto);
+
+  if (ampacidad && corriente > ampacidad) {
+    avisos.push(`Circuito ${numero}: la corriente calculada (${corriente}A) supera lo admisible para ${seccionTexto}mm² (~${ampacidad}A de referencia). Sugerencia: usar una sección mayor.`);
+  }
+  if (ampacidad && proteccion && proteccion > ampacidad) {
+    avisos.push(`Circuito ${numero}: la protección (${proteccion}A) supera la capacidad de referencia del conductor (~${ampacidad}A). Sugerencia: bajar la protección o subir la sección.`);
+  }
+  if (proteccion && corriente && proteccion < corriente) {
+    avisos.push(`Circuito ${numero}: la protección (${proteccion}A) es menor que la corriente calculada (${corriente}A). Revisar dimensionamiento.`);
+  }
+  if (!diferencial || /^no$/i.test(diferencial)) {
+    avisos.push(`Circuito ${numero}: sin diferencial asignado — la NCh Elec. 4/2003 exige protección diferencial (30mA) en la mayoría de los circuitos.`);
+  }
+  return avisos;
+}
+
+function revalidarCircuitosTE1_() {
+  const panel = document.getElementById('te1-avisos-normativa');
+  if (!panel) return; // el cuadro de cargas todavía no se renderizó
+  const filas = document.querySelectorAll('#tabla-circuitos-te1 tbody tr');
+  let todosLosAvisos = [];
+  filas.forEach(fila => {
+    const avisos = validarCircuitoTE1_(fila);
+    fila.querySelector('.circuito-estado').textContent = avisos.length ? '⚠️' : '✅';
+    fila.querySelector('.circuito-estado').title = avisos.join('\n');
+    todosLosAvisos = todosLosAvisos.concat(avisos);
+  });
+  panel.innerHTML = todosLosAvisos.length
+    ? `<div style="background:#fff3cd;color:#664d03;padding:10px 14px;border-radius:8px;font-size:13px;margin-top:10px;">
+        <strong>A revisar:</strong>
+        <ul style="margin:6px 0 0;padding-left:18px;">${todosLosAvisos.map(a => `<li>${a}</li>`).join('')}</ul>
+      </div>`
+    : '';
 }
 
 // ---------- Guardar (online: sube directo / offline: encola — ver llamarApi en pwa-api.js) ----------
