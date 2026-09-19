@@ -246,7 +246,7 @@ function renderFormularioTE1_() {
         <div><label>Demanda Total</label><p id="te1-demanda-total" style="font-weight:600;font-size:16px;margin:8px 0;">0 W</p></div>
       </div>
       <div id="te1-avisos-normativa"></div>
-      <p style="font-size:11px;color:#888;margin-top:6px;">Los avisos de corriente/protección son valores de referencia típicos (ver normativa-te1.json), no un respaldo normativo certificado — revisar siempre con criterio profesional.</p>
+      <p style="font-size:11px;color:#888;margin-top:6px;">Los avisos de corriente/protección usan la Tabla Nº 8.7 de la NCh Elec. 4/2003 (cobre/PVC, 30°C, sin corregir por temperatura ni agrupamiento de conductores — ver normativa-te1.json). No es un respaldo normativo certificado — revisar siempre con criterio profesional.</p>
     </div>
 
     <button type="button" class="btn-enviar" id="btn-guardar-te1">Guardar Expediente</button>
@@ -454,38 +454,45 @@ function leerCircuitosTE1_() {
 }
 
 // ---------- Validación orientativa contra la tabla de ampacidad (ver normativa-te1.json) ----------
-function buscarAmpacidad_(seccionTexto) {
-  const tabla = (normativaTE1_ && normativaTE1_.ampacidadCobrePVC) || {};
+// Busca la corriente admisible en la Tabla Nº 8.7 de la NCh Elec. 4/2003, según sección y el
+// "grupo" (método de instalación) que corresponde a la canalización elegida en la fila.
+function buscarAmpacidad_(seccionTexto, canalizacion) {
+  const tabla = (normativaTE1_ && normativaTE1_.corrienteAdmisibleTabla87) || {};
+  const grupoPorCanalizacion = (normativaTE1_ && normativaTE1_.grupoPorCanalizacion) || {};
   const seccion = parseFloat(String(seccionTexto || '').replace(',', '.'));
-  if (!seccion) return null;
-  // Match exacto primero; si no existe esa sección en la tabla, usa la más cercana hacia arriba.
+  const grupo = grupoPorCanalizacion[canalizacion];
+  if (!seccion || !grupo) return null;
+
+  const leerFila = clave => (tabla[clave] ? tabla[clave][grupo] : undefined);
   const claveExacta = Object.keys(tabla).find(k => parseFloat(k) === seccion);
-  if (claveExacta) return tabla[claveExacta];
+  if (claveExacta && leerFila(claveExacta) != null) return leerFila(claveExacta);
+  // Sin match exacto (o esa sección no está definida en esa columna): usa la más cercana hacia arriba.
   const secciones = Object.keys(tabla).map(parseFloat).sort((a, b) => a - b);
-  const masCercana = secciones.find(s => s >= seccion);
-  return masCercana ? tabla[masCercana] : null;
+  const masCercana = secciones.find(s => s >= seccion && leerFila(String(s)) != null);
+  return masCercana != null ? leerFila(String(masCercana)) : null;
 }
 
 function validarCircuitoTE1_(fila) {
   const avisos = [];
   const corriente = parseFloat(fila.querySelector('.circuito-corriente').textContent) || 0;
   const seccionTexto = fila.querySelector('.circuito-seccion').value;
+  const canalizacion = fila.querySelector('.circuito-canalizacion').value;
   const proteccion = parseFloat(String(fila.querySelector('.circuito-proteccion').value || '').replace(',', '.'));
   const diferencial = fila.querySelector('.circuito-diferencial').value.trim();
   const numero = fila.querySelector('.circuito-numero').value;
-  const ampacidad = buscarAmpacidad_(seccionTexto);
+  const ampacidad = buscarAmpacidad_(seccionTexto, canalizacion);
 
   if (ampacidad && corriente > ampacidad) {
-    avisos.push(`Circuito ${numero}: la corriente calculada (${corriente}A) supera lo admisible para ${seccionTexto}mm² (~${ampacidad}A de referencia). Sugerencia: usar una sección mayor.`);
+    avisos.push(`Circuito ${numero}: la corriente calculada (${corriente}A) supera la corriente admisible de la Tabla 8.7 para ${seccionTexto}mm² en "${canalizacion}" (${ampacidad}A). Sugerencia: usar una sección mayor.`);
   }
   if (ampacidad && proteccion && proteccion > ampacidad) {
-    avisos.push(`Circuito ${numero}: la protección (${proteccion}A) supera la capacidad de referencia del conductor (~${ampacidad}A). Sugerencia: bajar la protección o subir la sección.`);
+    avisos.push(`Circuito ${numero}: la protección (${proteccion}A) supera la corriente admisible del conductor (${ampacidad}A, Tabla 8.7). Sugerencia: bajar la protección o subir la sección.`);
   }
   if (proteccion && corriente && proteccion < corriente) {
     avisos.push(`Circuito ${numero}: la protección (${proteccion}A) es menor que la corriente calculada (${corriente}A). Revisar dimensionamiento.`);
   }
   if (!diferencial || /^no$/i.test(diferencial)) {
-    avisos.push(`Circuito ${numero}: sin diferencial asignado — la NCh Elec. 4/2003 exige protección diferencial (30mA) en la mayoría de los circuitos.`);
+    avisos.push(`Circuito ${numero}: sin diferencial asignado — revisar protección contra contactos indirectos (NCh Elec. 4/2003, sección 9.2). En la práctica se usa 30mA para circuitos generales y sensibilidades menores (10mA o 5mA) en recintos húmedos/mojados o piscinas (sección 11.4).`);
   }
   return avisos;
 }

@@ -1,5 +1,5 @@
 {
-  "nota": "Valores de referencia típicos (cobre, aislación PVC, 2 conductores cargados, canalización empotrada, temperatura ambiente 30°C), basados en tablas usuales de la NCh Elec. 4/2003. Son orientativos para avisar posibles problemas, NO un respaldo de cumplimiento normativo certificado: confirmar contra la edición vigente y las condiciones reales de instalación (agrupamiento de conductores, temperatura, método de instalación) antes de usarlos como sustento técnico formal. Editable sin tocar el código.",
+  "nota": "Tabla Nº 8.7 de la NCh Elec. 4/2003 (SEC) — 'Intensidad de Corriente Admisible para Conductores Aislados, Fabricados según Normas Europeas, Secciones Milimétricas', para conductores de cobre con aislación PVC, temperatura de servicio 70°C y temperatura ambiente 30°C. Transcrita del documento oficial publicado por la SEC (sec.cl/sitioweb/electricidad_norma4/norma4_completa.pdf, página 37 del PDF). 'null' = esa sección no está definida en esa columna de la tabla original. Estos avisos son orientativos para revisar in situ, NO un respaldo de cumplimiento normativo certificado: no incluyen los factores de corrección por temperatura distinta de 30°C (tabla 8.9) ni por más de 3 conductores activos en una misma canalización (tabla 8.8, factor fn) — si corresponde aplicarlos, hacerlo aparte. Editable sin tocar el código.",
   "canalizaciones": [
     "Tubería PVC empotrada",
     "Tubería PVC a la vista",
@@ -11,15 +11,43 @@
     "Directamente enterrado",
     "Al aire (cable tendido)"
   ],
-  "ampacidadCobrePVC": {
-    "1.5": 15,
-    "2.5": 20,
-    "4": 25,
-    "6": 34,
-    "10": 46,
-    "16": 61,
-    "25": 80,
-    "35": 99,
-    "50": 119
+  "grupoPorCanalizacion": {
+    "Tubería PVC empotrada": "grupo1",
+    "Tubería PVC a la vista": "grupo1",
+    "Tubería metálica (conduit) empotrada": "grupo1",
+    "Tubería metálica (conduit) a la vista": "grupo1",
+    "Bandeja portacable": "grupo2",
+    "Ducto": "grupo1",
+    "Canaleta": "grupo1",
+    "Directamente enterrado": null,
+    "Al aire (cable tendido)": "grupo3",
+    "_nota_grupos": "Grupo 1 = conductores monopolares en tuberías. Grupo 2 = conductores multipolares con cubierta común (cables planos, móviles, portátiles). Grupo 3 = conductores monopolares tendidos libremente al aire, separación mínima igual al diámetro del conductor. 'Directamente enterrado' no está cubierto por la Tabla 8.7 (requiere otra tabla que no está en este archivo) — no se valida por ahora."
+  },
+  "corrienteAdmisibleTabla87": {
+    "0.75": { "grupo1": null, "grupo2": 12, "grupo3": 15 },
+    "1": { "grupo1": 11, "grupo2": 15, "grupo3": 19 },
+    "1.5": { "grupo1": 15, "grupo2": 19, "grupo3": 23 },
+    "2.5": { "grupo1": 20, "grupo2": 25, "grupo3": 32 },
+    "4": { "grupo1": 25, "grupo2": 34, "grupo3": 42 },
+    "6": { "grupo1": 33, "grupo2": 44, "grupo3": 54 },
+    "10": { "grupo1": 45, "grupo2": 61, "grupo3": 73 },
+    "16": { "grupo1": 61, "grupo2": 82, "grupo3": 98 },
+    "25": { "grupo1": 83, "grupo2": 108, "grupo3": 129 },
+    "35": { "grupo1": 103, "grupo2": 134, "grupo3": 158 },
+    "50": { "grupo1": 132, "grupo2": 167, "grupo3": 197 },
+    "70": { "grupo1": 164, "grupo2": 207, "grupo3": 244 },
+    "95": { "grupo1": 197, "grupo2": 249, "grupo3": 291 },
+    "120": { "grupo1": 235, "grupo2": 291, "grupo3": 343 },
+    "150": { "grupo1": null, "grupo2": 327, "grupo3": 382 },
+    "185": { "grupo1": null, "grupo2": 374, "grupo3": 436 },
+    "240": { "grupo1": null, "grupo2": 442, "grupo3": 516 },
+    "300": { "grupo1": null, "grupo2": 510, "grupo3": 595 },
+    "400": { "grupo1": null, "grupo2": null, "grupo3": 708 },
+    "500": { "grupo1": null, "grupo2": null, "grupo3": 809 }
+  },
+  "seccionConductorProteccionTabla1023": {
+    "_nota": "Tabla Nº 10.23 — sección mínima del conductor de protección (tierra) según la sección del conductor activo. No se usa todavía en la validación automática (el formulario no pide hoy la sección del conductor de protección por separado); queda acá como referencia.",
+    "1.5": 1.5, "2.5": 2.5, "4": 2.5, "6": 4, "10": 6, "16": 6,
+    "25": 10, "35": 10, "50": 16, "70": 16, "95-185": 25, "240-300": 35, "400+": 50
   }
 }
