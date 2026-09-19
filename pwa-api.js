@@ -38,7 +38,7 @@ async function refrescarDatosSiHayConexion_() {
       obtenerApiGet_('clientes'),
       obtenerApiGet_('pendientesPresupuesto'),
       obtenerApiGet_('presupuestosGenerados'),
-      obtenerApiGet_('expedientesTE1')
+      obtenerApiGet_('expedientesSEC')
     ]);
     HISTORIAL_INICIAL = historial;
     PENDIENTES_PRESUPUESTO = pendientes;
@@ -173,7 +173,7 @@ async function intentarSincronizar_() {
         const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ accion: item.accion, token: API_TOKEN, args: [item.data] }) });
         const resultado = await resp.json();
         if (resultado.ok) {
-          if (item.accion === 'guardarExpedienteTE1' && resultado.codigo) {
+          if (item.accion === 'guardarExpedienteSEC' && resultado.codigo) {
             await resolverDependientesTE1_(item.clave, resultado.codigo);
           }
           await quitarDeOutbox_(item.clave);
@@ -196,7 +196,7 @@ async function intentarSincronizar_() {
 // Con conexión: POST al backend (texto plano, sin header Content-Type, para no disparar
 // preflight CORS que Apps Script no responde). Sin conexión: las acciones de la lista de abajo
 // se encolan en el outbox; cualquier otra acción exige conexión, nada se pierde si falla.
-const ACCIONES_ENCOLABLES_OFFLINE_ = ['guardarInforme', 'guardarExpedienteTE1', 'subirDocumentoTE1'];
+const ACCIONES_ENCOLABLES_OFFLINE_ = ['guardarInforme', 'guardarExpedienteSEC', 'subirDocumentoSEC'];
 
 async function llamarApi(accion, args, opciones) {
   opciones = opciones || {};

@@ -1,0 +1,12 @@
+[
+  { "id": "post-01", "categoria": "Postación", "item": "Postes metálicos con toma de tierra (si corresponde)", "obligatorio": true },
+  { "id": "post-02", "categoria": "Postación", "item": "Cantidad de postes en terreno coincide con lo declarado en el proyecto", "obligatorio": true },
+  { "id": "lum-01", "categoria": "Luminarias", "item": "Luminarias instaladas cuentan con certificación SEC vigente (Sello/Folio QR)", "obligatorio": true },
+  { "id": "lum-02", "categoria": "Luminarias", "item": "Cantidad de luminarias en terreno coincide con lo declarado", "obligatorio": true },
+  { "id": "circ-01", "categoria": "Circuito de Alumbrado", "item": "Diagrama unilineal ejecutado coincide con las protecciones instaladas", "obligatorio": true },
+  { "id": "circ-02", "categoria": "Circuito de Alumbrado", "item": "Cuadro de cargas con protecciones por circuito", "obligatorio": true },
+  { "id": "enc-01", "categoria": "Encendido / Apagado", "item": "Sistema de encendido/apagado operativo (fotocélula o reloj astronómico programable)", "obligatorio": true },
+  { "id": "emp-01", "categoria": "Empalme", "item": "Empalme y medidor (si corresponde) en buen estado", "obligatorio": false },
+  { "id": "cam-01", "categoria": "Cámaras", "item": "Cámaras de inspección accesibles y en buen estado (si corresponde)", "obligatorio": false },
+  { "id": "red-01", "categoria": "Red", "item": "Canalización (aérea/subterránea) ejecutada según lo declarado", "obligatorio": true }
+]
