@@ -101,14 +101,16 @@ function mostrarTE1_() {
   const borrador = restaurarBorradorTE1_();
   cont.innerHTML = `
     <div class="seccion">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
         <h3 style="margin:0;">Expedientes SEC</h3>
-        <button type="button" class="btn-enviar" id="btn-nuevo-te1" style="width:auto; padding:8px 16px;">+ Nuevo</button>
+        <div style="display:flex; flex-direction:column; align-items:stretch; gap:6px;">
+          <button type="button" class="btn-enviar" id="btn-nuevo-te1" style="width:auto; padding:8px 16px;">+ Nuevo</button>
+          <button type="button" id="btn-descartar-todo-te1" style="display:none; padding:6px 12px; border:1px solid #c0392b; color:#c0392b; background:#fff; border-radius:8px; font-size:13px; cursor:pointer;">Descartar lo empezado</button>
+        </div>
       </div>
-      ${borrador ? `<p style="background:#fff3cd;color:#664d03;padding:10px 14px;border-radius:8px;font-size:13px;">
+      ${borrador ? `<p id="te1-aviso-borrador" style="background:#fff3cd;color:#664d03;padding:10px 14px;border-radius:8px;font-size:13px;">
         Tienes un expediente ${borrador.tipoTramite || 'SEC'} sin terminar de enviar (${borrador.codigo || 'sin código aún'} — ${borrador.cliente || 'sin cliente'}).
         <button type="button" id="btn-continuar-borrador-te1" style="margin-left:8px;">Continuar</button>
-        <button type="button" id="btn-descartar-borrador-te1" style="margin-left:6px;">Descartar</button>
       </p>` : ''}
       <div id="te1-lista-sincronizados"></div>
     </div>
@@ -117,16 +119,33 @@ function mostrarTE1_() {
   document.getElementById('btn-nuevo-te1').addEventListener('click', () => nuevoExpedienteTE1_());
   const btnContinuarBorrador = document.getElementById('btn-continuar-borrador-te1');
   if (btnContinuarBorrador) btnContinuarBorrador.addEventListener('click', () => abrirExpedienteTE1_(borrador));
-  const btnDescartarBorrador = document.getElementById('btn-descartar-borrador-te1');
-  if (btnDescartarBorrador) {
-    btnDescartarBorrador.addEventListener('click', () => {
-      if (!confirm('¿Descartar este borrador? Se borra lo que quedó sin enviar en este celular (si el expediente ya se había guardado, sigue en la lista de abajo).')) return;
-      borrarBorradorTE1_();
-      const aviso = btnDescartarBorrador.closest('p');
-      if (aviso) aviso.remove();
-    });
-  }
+  document.getElementById('btn-descartar-todo-te1').addEventListener('click', descartarTrabajoEnCursoTE1_);
+  actualizarBotonDescartarTE1_();
   refrescarListaExpedientesTE1_();
+}
+
+// El botón "Descartar lo empezado" solo aparece si hay algo que descartar: un formulario abierto
+// en pantalla o un borrador sin enviar guardado en este celular.
+function actualizarBotonDescartarTE1_() {
+  const btn = document.getElementById('btn-descartar-todo-te1');
+  if (!btn) return;
+  const formAbierto = document.getElementById('te1-formulario');
+  const hayAlgo = (formAbierto && formAbierto.children.length) || restaurarBorradorTE1_();
+  btn.style.display = hayAlgo ? '' : 'none';
+}
+
+// Cierra el formulario que se estaba llenando y borra el borrador de este celular. No toca lo que
+// ya está guardado en el servidor (sigue en la lista) ni lo que quedó en la cola de envío offline.
+function descartarTrabajoEnCursoTE1_() {
+  if (!confirm('¿Descartar lo que empezaste? Se cierra el formulario y se borra lo que no alcanzaste a guardar. Los expedientes ya guardados no se tocan.')) return;
+  borrarBorradorTE1_();
+  expedienteActual_ = null;
+  documentosPendientes_ = [];
+  const form = document.getElementById('te1-formulario');
+  if (form) form.innerHTML = '';
+  const aviso = document.getElementById('te1-aviso-borrador');
+  if (aviso) aviso.remove();
+  actualizarBotonDescartarTE1_();
 }
 
 // Llamada por pwa-api.js cada vez que se refresca EXPEDIENTES_TE1 contra la API.
@@ -320,6 +339,7 @@ function renderFormularioTE1_() {
     renderCuerpoTramite_();
   }
   (e.puntosPropuestos || []).forEach(p => agregarFilaPuntoTE1_(p));
+  actualizarBotonDescartarTE1_();
 }
 
 function poblarCategoriasDocumentoSEC_() {
