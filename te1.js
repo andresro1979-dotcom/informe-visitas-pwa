@@ -301,7 +301,7 @@ function renderChecklistTE1_() {
   cont.innerHTML = Object.keys(categorias).map(cat => `
     <h4 style="margin:14px 0 6px;color:var(--azul-oscuro);">${cat}</h4>
     ${categorias[cat].map(it => `
-      <div style="border-bottom:1px solid var(--borde);padding:8px 0;">
+      <div class="te1-checklist-fila" data-idx="${it.idx}" style="border-bottom:1px solid var(--borde);padding:8px 0;${it.duda ? 'border-left:3px solid #ff7a1a;padding-left:8px;' : ''}">
         <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">
           <span style="flex:1;font-size:14px;">${it.item}${it.obligatorio ? ' <span style="color:#c0392b;">*</span>' : ''}</span>
           <select class="te1-checklist-estado" data-idx="${it.idx}" style="width:auto;">
@@ -312,6 +312,7 @@ function renderChecklistTE1_() {
           </select>
         </div>
         <input type="text" class="te1-checklist-obs" data-idx="${it.idx}" placeholder="Observación (opcional)" value="${it.observacion || ''}" style="margin-top:4px;">
+        <input type="text" class="te1-checklist-duda" data-idx="${it.idx}" placeholder="¿Alguna duda con este ítem? Escribe la consulta para revisarla después" value="${it.duda || ''}" style="margin-top:4px;${it.duda ? 'border-color:#ff7a1a;' : ''}">
       </div>
     `).join('')}
   `).join('');
@@ -325,6 +326,19 @@ function renderChecklistTE1_() {
   cont.querySelectorAll('.te1-checklist-obs').forEach(inp => {
     inp.addEventListener('input', () => {
       expedienteActual_.checklist[Number(inp.dataset.idx)].observacion = inp.value;
+      guardarBorradorTE1_();
+    });
+  });
+  // "Duda / a consultar": queda guardada junto al ítem y resaltada, para que la oficina la vea
+  // reunida al revisar el expediente (ver "Dudas a consultar" en abrirDetalleTE1Oficina_, Index.html).
+  cont.querySelectorAll('.te1-checklist-duda').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const idx = Number(inp.dataset.idx);
+      expedienteActual_.checklist[idx].duda = inp.value;
+      inp.closest('.te1-checklist-fila').style.cssText = inp.value
+        ? 'border-bottom:1px solid var(--borde);padding:8px 0;border-left:3px solid #ff7a1a;padding-left:8px;'
+        : 'border-bottom:1px solid var(--borde);padding:8px 0;';
+      inp.style.borderColor = inp.value ? '#ff7a1a' : '';
       guardarBorradorTE1_();
     });
   });
